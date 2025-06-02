@@ -200,13 +200,63 @@ scene.add(createPalmTree(20, 42));
 // Diamond particles - removed for cleaner look
 
 // Create luxury gauges
-function createGaugeElement(label, value) {
+function createGaugeElement(label, value, maxValue = 100) {
     const gaugeDiv = document.createElement('div');
     gaugeDiv.className = 'gauge';
+    
+    // Create tick marks
+    let ticksHTML = '<div class="gauge-ticks">';
+    for (let i = 0; i <= 10; i++) {
+        const angle = (i * 18) - 90;
+        const isMajor = i % 2 === 0;
+        ticksHTML += `<div class="gauge-tick ${isMajor ? 'major' : ''}" style="transform: translateX(-50%) rotate(${angle}deg)"></div>`;
+    }
+    ticksHTML += '</div>';
+    
+    // Create numbers
+    let numbersHTML = '<div class="gauge-numbers">';
+    for (let i = 0; i <= 10; i += 2) {
+        const angle = (i * 18) - 90;
+        const numberValue = (i * 10);
+        numbersHTML += `<div class="gauge-number" style="transform: translateX(-50%) rotate(${angle}deg)">
+            <span style="transform: rotate(${-angle}deg); display: inline-block;">${numberValue}</span>
+        </div>`;
+    }
+    numbersHTML += '</div>';
+    
+    // Create zones
+    const zonesHTML = `
+        <div class="gauge-zones">
+            <svg width="200" height="200" style="position: absolute; top: 0; left: 0;">
+                <defs>
+                    <linearGradient id="greenZone${label}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#90EE90;stop-opacity:0.3" />
+                        <stop offset="100%" style="stop-color:#228B22;stop-opacity:0.1" />
+                    </linearGradient>
+                    <linearGradient id="yellowZone${label}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FFD700;stop-opacity:0.3" />
+                        <stop offset="100%" style="stop-color:#FFA500;stop-opacity:0.1" />
+                    </linearGradient>
+                    <linearGradient id="redZone${label}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:0.3" />
+                        <stop offset="100%" style="stop-color:#FF1493;stop-opacity:0.1" />
+                    </linearGradient>
+                </defs>
+                <path d="M 100 10 A 90 90 0 0 1 170 50" fill="none" stroke="url(#greenZone${label})" stroke-width="30" opacity="0.5"/>
+                <path d="M 170 50 A 90 90 0 0 1 190 100" fill="none" stroke="url(#yellowZone${label})" stroke-width="30" opacity="0.5"/>
+                <path d="M 190 100 A 90 90 0 0 1 170 150" fill="none" stroke="url(#redZone${label})" stroke-width="30" opacity="0.5"/>
+            </svg>
+        </div>
+    `;
+    
     gaugeDiv.innerHTML = `
         <div class="gauge-face">
+            ${ticksHTML}
+            ${numbersHTML}
+            ${zonesHTML}
             <div class="gauge-needle" data-value="${value}"></div>
             <div class="gauge-center"></div>
+            <div class="gauge-value">${value}%</div>
         </div>
         <div class="gauge-label">${label}</div>
     `;
@@ -214,13 +264,19 @@ function createGaugeElement(label, value) {
     // Add click interaction
     gaugeDiv.addEventListener('click', () => {
         const needle = gaugeDiv.querySelector('.gauge-needle');
-        const currentRotation = parseFloat(needle.style.transform.match(/rotate\(([-\d.]+)deg\)/) || [0, 0])[1];
-        const newRotation = Math.random() * 180 - 90;
+        const valueDisplay = gaugeDiv.querySelector('.gauge-value');
+        const newValue = Math.floor(Math.random() * 100);
+        const newRotation = (newValue * 1.8) - 90;
         
         gsap.to(needle, {
             rotation: newRotation,
             duration: 1.5,
-            ease: "elastic.out(1, 0.3)"
+            ease: "elastic.out(1, 0.3)",
+            onUpdate: function() {
+                const currentRotation = gsap.getProperty(needle, "rotation");
+                const currentValue = Math.round((currentRotation + 90) / 1.8);
+                valueDisplay.textContent = `${currentValue}%`;
+            }
         });
         
         // Play chime sound
@@ -245,17 +301,24 @@ const gauges = [
     { label: 'Clients', value: 85 }
 ];
 
-gauges.forEach(gauge => {
+gauges.forEach((gauge, index) => {
     const gaugeElement = createGaugeElement(gauge.label, gauge.value);
     gaugeContainer.appendChild(gaugeElement);
     
-    // Set initial needle position
+    // Set initial needle position with staggered animation
     setTimeout(() => {
         const needle = gaugeElement.querySelector('.gauge-needle');
+        const valueDisplay = gaugeElement.querySelector('.gauge-value');
         gsap.to(needle, {
             rotation: gauge.value * 1.8 - 90,
             duration: 2,
-            ease: "elastic.out(1, 0.5)"
+            ease: "elastic.out(1, 0.5)",
+            delay: index * 0.2,
+            onUpdate: function() {
+                const currentRotation = gsap.getProperty(needle, "rotation");
+                const currentValue = Math.round((currentRotation + 90) / 1.8);
+                valueDisplay.textContent = `${currentValue}%`;
+            }
         });
     }, 500);
 });
@@ -335,3 +398,58 @@ function createDiamondParticles() {
 }
 
 createDiamondParticles();
+
+// Real-time data updates
+function updateDashboardData() {
+    const statsPanel = document.querySelector('.stats-panel');
+    const gauges = document.querySelectorAll('.gauge');
+    
+    // Simulate real-time updates
+    setInterval(() => {
+        // Update stats panel
+        const dailyGoal = statsPanel.querySelector('.stat-item:nth-child(1) .stat-value');
+        const achievement = statsPanel.querySelector('.stat-item:nth-child(2) .stat-value');
+        
+        // Animate stats with small random changes
+        const currentAchievement = parseInt(achievement.textContent);
+        const newAchievement = Math.max(0, Math.min(100, currentAchievement + (Math.random() - 0.5) * 5));
+        
+        gsap.to(achievement, {
+            textContent: Math.round(newAchievement) + '%',
+            duration: 1,
+            ease: "power2.inOut",
+            snap: { textContent: 1 }
+        });
+        
+        // Occasionally update a random gauge
+        if (Math.random() > 0.8) {
+            const randomGauge = gauges[Math.floor(Math.random() * gauges.length)];
+            const needle = randomGauge.querySelector('.gauge-needle');
+            const valueDisplay = randomGauge.querySelector('.gauge-value');
+            const currentValue = parseInt(valueDisplay.textContent);
+            const change = (Math.random() - 0.5) * 20;
+            const newValue = Math.max(0, Math.min(100, currentValue + change));
+            const newRotation = (newValue * 1.8) - 90;
+            
+            gsap.to(needle, {
+                rotation: newRotation,
+                duration: 1.5,
+                ease: "power2.inOut",
+                onUpdate: function() {
+                    const currentRotation = gsap.getProperty(needle, "rotation");
+                    const currentValue = Math.round((currentRotation + 90) / 1.8);
+                    valueDisplay.textContent = `${currentValue}%`;
+                }
+            });
+            
+            // Add subtle glow effect on update
+            randomGauge.style.filter = 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))';
+            setTimeout(() => {
+                randomGauge.style.filter = '';
+            }, 1000);
+        }
+    }, 3000);
+}
+
+// Initialize real-time updates
+setTimeout(updateDashboardData, 2000);
