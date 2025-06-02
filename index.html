@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diamond Line - Luxury Sales Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div id="app">
+        <canvas id="canvas"></canvas>
+        
+        <!-- Luxury UI Overlay -->
+        <div class="ui-overlay">
+            <div class="brand-mark">
+                <span class="brand-icon">💎</span>
+                <h1 class="brand-name">Diamond Line</h1>
+            </div>
+            
+            <div class="gauge-container" id="gaugeContainer">
+                <!-- Gauges will be dynamically inserted here -->
+            </div>
+            
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <span class="stat-label">Daily Goal</span>
+                    <span class="stat-value">$250K</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Achievement</span>
+                    <span class="stat-value">87%</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Audio elements for sound effects -->
+        <audio id="chimeSound" preload="auto">
+            <source src="/sounds/chime.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+    
+    <script type="module" src="/main.js"></script>
+</body>
+</html>
