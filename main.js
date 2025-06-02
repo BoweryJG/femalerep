@@ -197,27 +197,7 @@ scene.add(createPalmTree(15, 38));
 scene.add(createPalmTree(-20, 45));
 scene.add(createPalmTree(20, 42));
 
-// Diamond particles
-const particlesGeometry = new THREE.BufferGeometry();
-const particlesCount = 1000;
-const posArray = new Float32Array(particlesCount * 3);
-
-for (let i = 0; i < particlesCount * 3; i++) {
-    posArray[i] = (Math.random() - 0.5) * 100;
-}
-
-particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-
-const particlesMaterial = new THREE.PointsMaterial({
-    size: 0.1,
-    color: 0xffd700,
-    transparent: true,
-    opacity: 0.8,
-    blending: THREE.AdditiveBlending
-});
-
-const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-scene.add(particlesMesh);
+// Diamond particles - removed for cleaner look
 
 // Create luxury gauges
 function createGaugeElement(label, value) {
@@ -314,8 +294,7 @@ function animate() {
     // Animate water
     water.material.uniforms['time'].value += 1.0 / 60.0;
     
-    // Animate particles
-    particlesMesh.rotation.y += 0.0005;
+    // Removed particle animation
     
     // Subtle car animation
     carGroup.position.y = Math.sin(Date.now() * 0.001) * 0.1;
