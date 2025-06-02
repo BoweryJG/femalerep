@@ -97,19 +97,69 @@ sun.setFromSphericalCoords(1, phi, theta);
 skyUniforms['sunPosition'].value.copy(sun);
 water.material.uniforms['sunDirection'].value.copy(sun).normalize();
 
-// Beach sand
-const sandGeometry = new THREE.PlaneGeometry(200, 100);
+// Beach sand with realistic texture
+const sandTexture = new THREE.TextureLoader().load('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+sandTexture.wrapS = sandTexture.wrapT = THREE.RepeatWrapping;
+sandTexture.repeat.set(50, 50);
+
+// Create sand dunes with displacement
+const sandGeometry = new THREE.PlaneGeometry(300, 150, 128, 128);
 const sandMaterial = new THREE.MeshStandardMaterial({
     color: 0xf4e4c1,
-    roughness: 0.8,
-    metalness: 0.1
+    roughness: 0.9,
+    metalness: 0.05,
+    map: sandTexture,
+    displacementScale: 3,
+    bumpScale: 0.5
 });
+
+// Create height variations for dunes
+const sandVertices = sandGeometry.attributes.position.array;
+for (let i = 0; i < sandVertices.length; i += 3) {
+    const x = sandVertices[i];
+    const y = sandVertices[i + 1];
+    
+    // Create dune-like formations
+    const distance = Math.sqrt(x * x + y * y);
+    const dune1 = Math.sin(x * 0.05) * Math.cos(y * 0.03) * 2;
+    const dune2 = Math.sin(x * 0.02 + 1) * Math.cos(y * 0.04) * 3;
+    const ripples = Math.sin(x * 0.3) * Math.cos(y * 0.3) * 0.2;
+    
+    sandVertices[i + 2] = dune1 + dune2 + ripples + Math.random() * 0.1;
+}
+sandGeometry.computeVertexNormals();
+
 const sand = new THREE.Mesh(sandGeometry, sandMaterial);
 sand.rotation.x = -Math.PI / 2;
 sand.position.y = -1.5;
 sand.position.z = 40;
 sand.receiveShadow = true;
+sand.castShadow = true;
 scene.add(sand);
+
+// Add multiple sand layers for depth
+const farSandGeometry = new THREE.PlaneGeometry(400, 200, 64, 64);
+const farSandMaterial = new THREE.MeshStandardMaterial({
+    color: 0xe8d4b0,
+    roughness: 0.95,
+    metalness: 0
+});
+
+// Create distant dunes
+const farSandVertices = farSandGeometry.attributes.position.array;
+for (let i = 0; i < farSandVertices.length; i += 3) {
+    const x = farSandVertices[i];
+    const y = farSandVertices[i + 1];
+    farSandVertices[i + 2] = Math.sin(x * 0.02) * Math.cos(y * 0.02) * 5 + Math.random() * 0.5;
+}
+farSandGeometry.computeVertexNormals();
+
+const farSand = new THREE.Mesh(farSandGeometry, farSandMaterial);
+farSand.rotation.x = -Math.PI / 2;
+farSand.position.y = -2;
+farSand.position.z = 80;
+farSand.receiveShadow = true;
+scene.add(farSand);
 
 // Luxury car placeholder (simplified)
 const carGroup = new THREE.Group();
@@ -196,6 +246,141 @@ scene.add(createPalmTree(-15, 35));
 scene.add(createPalmTree(15, 38));
 scene.add(createPalmTree(-20, 45));
 scene.add(createPalmTree(20, 42));
+
+// Sand particles for wind effect
+const sandParticlesGeometry = new THREE.BufferGeometry();
+const sandParticlesCount = 2000;
+const sandPosArray = new Float32Array(sandParticlesCount * 3);
+
+for (let i = 0; i < sandParticlesCount * 3; i += 3) {
+    sandPosArray[i] = (Math.random() - 0.5) * 200; // x
+    sandPosArray[i + 1] = Math.random() * 10 - 2; // y
+    sandPosArray[i + 2] = (Math.random() - 0.5) * 100 + 40; // z
+}
+
+sandParticlesGeometry.setAttribute('position', new THREE.BufferAttribute(sandPosArray, 3));
+
+const sandParticlesMaterial = new THREE.PointsMaterial({
+    size: 0.05,
+    color: 0xf4e4c1,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending
+});
+
+const sandParticles = new THREE.Points(sandParticlesGeometry, sandParticlesMaterial);
+scene.add(sandParticles);
+
+// Beach grass
+function createBeachGrass(x, z) {
+    const grassGroup = new THREE.Group();
+    
+    for (let i = 0; i < 15; i++) {
+        const grassGeometry = new THREE.ConeGeometry(0.05, 2 + Math.random(), 4);
+        const grassMaterial = new THREE.MeshStandardMaterial({
+            color: 0x7cfc00,
+            roughness: 0.8,
+            side: THREE.DoubleSide
+        });
+        
+        const grass = new THREE.Mesh(grassGeometry, grassMaterial);
+        grass.position.x = (Math.random() - 0.5) * 2;
+        grass.position.z = (Math.random() - 0.5) * 2;
+        grass.position.y = 1;
+        grass.rotation.z = (Math.random() - 0.5) * 0.3;
+        grass.userData.originalRotation = grass.rotation.z;
+        grassGroup.add(grass);
+    }
+    
+    grassGroup.position.set(x, -1, z);
+    return grassGroup;
+}
+
+// Add beach grass clusters
+scene.add(createBeachGrass(-10, 30));
+scene.add(createBeachGrass(10, 32));
+scene.add(createBeachGrass(-25, 40));
+scene.add(createBeachGrass(25, 38));
+scene.add(createBeachGrass(0, 35));
+
+// Seashells and beach debris
+function createSeashell(x, z) {
+    const shellGeometry = new THREE.SphereGeometry(0.2, 16, 8);
+    shellGeometry.scale(1, 0.6, 0.8);
+    
+    const shellMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0xffdab9,
+        metalness: 0.1,
+        roughness: 0.3,
+        clearcoat: 0.3,
+        clearcoatRoughness: 0.2
+    });
+    
+    const shell = new THREE.Mesh(shellGeometry, shellMaterial);
+    shell.position.set(x, -1.3 + Math.random() * 0.1, z);
+    shell.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+    shell.scale.setScalar(0.5 + Math.random() * 0.5);
+    shell.castShadow = true;
+    
+    return shell;
+}
+
+// Driftwood
+function createDriftwood(x, z) {
+    const woodGeometry = new THREE.CylinderGeometry(0.1, 0.15, 3 + Math.random() * 2, 6);
+    const woodMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8b7355,
+        roughness: 0.9,
+        metalness: 0
+    });
+    
+    const wood = new THREE.Mesh(woodGeometry, woodMaterial);
+    wood.position.set(x, -1.2, z);
+    wood.rotation.set(Math.PI / 2 + Math.random() * 0.3, Math.random() * Math.PI, 0);
+    wood.castShadow = true;
+    
+    return wood;
+}
+
+// Add shells and driftwood
+for (let i = 0; i < 15; i++) {
+    scene.add(createSeashell(
+        (Math.random() - 0.5) * 60,
+        20 + Math.random() * 30
+    ));
+}
+
+for (let i = 0; i < 5; i++) {
+    scene.add(createDriftwood(
+        (Math.random() - 0.5) * 40,
+        25 + Math.random() * 20
+    ));
+}
+
+// Foam where waves meet sand
+const foamGeometry = new THREE.PlaneGeometry(150, 20, 64, 16);
+const foamMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.7,
+    roughness: 0.1,
+    metalness: 0,
+    emissive: 0xffffff,
+    emissiveIntensity: 0.1
+});
+
+// Create foam wave pattern
+const foamVertices = foamGeometry.attributes.position.array;
+for (let i = 0; i < foamVertices.length; i += 3) {
+    const x = foamVertices[i];
+    foamVertices[i + 2] = Math.sin(x * 0.1) * 0.3 + Math.random() * 0.1;
+}
+foamGeometry.computeVertexNormals();
+
+const foam = new THREE.Mesh(foamGeometry, foamMaterial);
+foam.rotation.x = -Math.PI / 2;
+foam.position.set(0, -1.4, 10);
+scene.add(foam);
 
 // Diamond particles - removed for cleaner look
 
@@ -422,10 +607,31 @@ function animate() {
     // Animate water
     water.material.uniforms['time'].value += 1.0 / 60.0;
     
-    // Removed particle animation
+    // Animate sand particles (wind effect)
+    const sandPositions = sandParticles.geometry.attributes.position.array;
+    for (let i = 0; i < sandPositions.length; i += 3) {
+        sandPositions[i] += Math.sin(Date.now() * 0.001 + i) * 0.02; // x drift
+        sandPositions[i + 1] += Math.sin(Date.now() * 0.002 + i) * 0.01; // y float
+        
+        // Reset particles that drift too far
+        if (sandPositions[i] > 100) sandPositions[i] = -100;
+        if (sandPositions[i + 1] > 10) sandPositions[i + 1] = -2;
+    }
+    sandParticles.geometry.attributes.position.needsUpdate = true;
+    
+    // Animate foam
+    foam.material.opacity = 0.6 + Math.sin(Date.now() * 0.002) * 0.2;
+    foam.position.z = 10 + Math.sin(Date.now() * 0.001) * 2;
     
     // Subtle car animation
     carGroup.position.y = Math.sin(Date.now() * 0.001) * 0.1;
+    
+    // Animate beach grass
+    scene.traverse((child) => {
+        if (child.material && child.material.color && child.material.color.r === 0.486) { // grass color check
+            child.rotation.z = child.userData.originalRotation + Math.sin(Date.now() * 0.001) * 0.1;
+        }
+    });
     
     // Render scene
     renderer.render(scene, camera);
