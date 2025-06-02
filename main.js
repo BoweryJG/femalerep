@@ -224,6 +224,41 @@ function createGaugeElement(label, value, maxValue = 100) {
     }
     numbersHTML += '</div>';
     
+    // Determine texture pattern based on gauge type
+    let texturePattern = '';
+    if (label === 'Revenue') {
+        // Tapisserie (waffle) pattern
+        texturePattern = `
+            <pattern id="tapisserie${label}" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+                <rect x="0" y="0" width="5" height="5" fill="rgba(255, 215, 0, 0.05)" />
+                <rect x="5" y="5" width="5" height="5" fill="rgba(255, 215, 0, 0.05)" />
+                <rect x="0" y="0" width="10" height="10" fill="none" stroke="rgba(255, 182, 193, 0.1)" stroke-width="0.5" />
+            </pattern>
+        `;
+    } else if (label === 'Deals') {
+        // Sunburst pattern
+        texturePattern = `
+            <pattern id="sunburst${label}" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+                <g transform="translate(100,100)">
+                    ${Array.from({length: 36}, (_, i) => {
+                        const angle = i * 10;
+                        return `<line x1="0" y1="0" x2="0" y2="-90" stroke="rgba(255, 215, 0, 0.03)" stroke-width="0.5" transform="rotate(${angle})" />`;
+                    }).join('')}
+                </g>
+            </pattern>
+        `;
+    } else {
+        // Meteorite pattern
+        texturePattern = `
+            <pattern id="meteorite${label}" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+                <circle cx="5" cy="5" r="2" fill="rgba(255, 255, 255, 0.05)" />
+                <circle cx="15" cy="12" r="1.5" fill="rgba(255, 182, 193, 0.04)" />
+                <circle cx="25" cy="20" r="2.5" fill="rgba(255, 215, 0, 0.03)" />
+                <circle cx="8" cy="25" r="1" fill="rgba(255, 255, 255, 0.04)" />
+            </pattern>
+        `;
+    }
+    
     // Create zones
     const zonesHTML = `
         <div class="gauge-zones">
@@ -241,12 +276,9 @@ function createGaugeElement(label, value, maxValue = 100) {
                         <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:0.3" />
                         <stop offset="100%" style="stop-color:#FF1493;stop-opacity:0.1" />
                     </linearGradient>
-                    <pattern id="guilloche${label}" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
-                        <circle cx="1" cy="1" r="0.5" fill="rgba(255, 215, 0, 0.03)" />
-                        <circle cx="3" cy="3" r="0.5" fill="rgba(255, 215, 0, 0.03)" />
-                    </pattern>
+                    ${texturePattern}
                 </defs>
-                <circle cx="100" cy="100" r="85" fill="url(#guilloche${label})" opacity="0.5"/>
+                <circle cx="100" cy="100" r="90" fill="url(#${label === 'Revenue' ? 'tapisserie' : label === 'Deals' ? 'sunburst' : 'meteorite'}${label})" opacity="0.8"/>
                 <path d="M 100 10 A 90 90 0 0 1 170 50" fill="none" stroke="url(#greenZone${label})" stroke-width="30" opacity="0.5"/>
                 <path d="M 170 50 A 90 90 0 0 1 190 100" fill="none" stroke="url(#yellowZone${label})" stroke-width="30" opacity="0.5"/>
                 <path d="M 190 100 A 90 90 0 0 1 170 150" fill="none" stroke="url(#redZone${label})" stroke-width="30" opacity="0.5"/>
