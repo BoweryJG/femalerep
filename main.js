@@ -241,7 +241,12 @@ function createGaugeElement(label, value, maxValue = 100) {
                         <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:0.3" />
                         <stop offset="100%" style="stop-color:#FF1493;stop-opacity:0.1" />
                     </linearGradient>
+                    <pattern id="guilloche${label}" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+                        <circle cx="1" cy="1" r="0.5" fill="rgba(255, 215, 0, 0.03)" />
+                        <circle cx="3" cy="3" r="0.5" fill="rgba(255, 215, 0, 0.03)" />
+                    </pattern>
                 </defs>
+                <circle cx="100" cy="100" r="85" fill="url(#guilloche${label})" opacity="0.5"/>
                 <path d="M 100 10 A 90 90 0 0 1 170 50" fill="none" stroke="url(#greenZone${label})" stroke-width="30" opacity="0.5"/>
                 <path d="M 170 50 A 90 90 0 0 1 190 100" fill="none" stroke="url(#yellowZone${label})" stroke-width="30" opacity="0.5"/>
                 <path d="M 190 100 A 90 90 0 0 1 170 150" fill="none" stroke="url(#redZone${label})" stroke-width="30" opacity="0.5"/>
@@ -249,14 +254,42 @@ function createGaugeElement(label, value, maxValue = 100) {
         </div>
     `;
     
+    // Create diamond bezel
+    let diamondBezelHTML = '<div class="gauge-bezel">';
+    for (let i = 0; i < 60; i++) {
+        const angle = (i * 6) - 90;
+        const isDiamond = i % 5 === 0;
+        if (isDiamond) {
+            diamondBezelHTML += `<div class="bezel-diamond" style="transform: rotate(${angle}deg) translateY(-95px)">
+                <div class="diamond-sparkle"></div>
+            </div>`;
+        }
+    }
+    diamondBezelHTML += '</div>';
+    
+    // Create complications (mini dials)
+    const complicationsHTML = `
+        <div class="gauge-complications">
+            <div class="complication complication-seconds" style="transform: translate(-30px, -30px)">
+                <div class="complication-hand"></div>
+                <div class="complication-center"></div>
+            </div>
+            <div class="complication complication-date" style="transform: translate(30px, -30px)">
+                <div class="date-window">${new Date().getDate()}</div>
+            </div>
+        </div>
+    `;
+    
     gaugeDiv.innerHTML = `
         <div class="gauge-face">
+            ${zonesHTML}
             ${ticksHTML}
             ${numbersHTML}
-            ${zonesHTML}
+            ${complicationsHTML}
             <div class="gauge-needle" data-value="${value}"></div>
             <div class="gauge-center"></div>
             <div class="gauge-value">${value}%</div>
+            ${diamondBezelHTML}
         </div>
         <div class="gauge-label">${label}</div>
     `;
