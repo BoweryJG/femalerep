@@ -1814,11 +1814,11 @@ body[data-theme="gold"] {
 @media (max-width: 768px) {
     .gauge-container {
         /* Position pad all the way at the top, full width */
-        position: fixed;
-        top: 10px;
-        left: 0;
-        right: 0;
-        transform: none;
+        position: fixed !important;
+        top: 10px !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: none !important;
         
         /* Full width design for mobile navbar style */
         gap: 20px;
@@ -1835,6 +1835,12 @@ body[data-theme="gold"] {
         flex-wrap: nowrap;
         visibility: visible !important;
         z-index: 2000; /* Above brand mark */
+        
+        /* Disable dragging on mobile */
+        cursor: default !important;
+        user-select: none;
+        -webkit-user-drag: none;
+        touch-action: none;
     }
     
     .gauge {
@@ -1934,40 +1940,47 @@ body[data-theme="gold"] {
         font-size: 1.3rem;
     }
     
-    /* Pattern selector - full width overlay */
+    /* Pattern selector - inside gauge container for mobile */
     .pattern-toggle-controls {
-        position: fixed;
-        top: auto;
-        bottom: 80px;
-        right: 20px;
-        z-index: 2000;
+        position: absolute !important;
+        bottom: auto !important;
+        top: 10px !important;
+        right: 10px !important;
+        z-index: 100;
     }
     
     .pattern-toggle-icon {
-        width: 55px;
-        height: 55px;
-        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6);
+        width: 60px;
+        height: 60px;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.7);
+        background: rgba(20, 20, 20, 0.95);
+        border: 2px solid var(--primary-color);
     }
     
     .pattern-icon-symbol {
-        font-size: 1.4rem;
+        font-size: 1.6rem;
     }
     
     .pattern-icon-text {
-        font-size: 0.55rem;
+        font-size: 0.6rem;
         letter-spacing: 0.08em;
+        font-weight: 600;
     }
     
     .pattern-selector-panel {
         position: fixed;
-        width: 90vw;
-        max-width: 380px;
-        right: 50%;
-        transform: translateX(50%);
-        bottom: 150px;
+        width: 95vw;
+        max-width: 400px;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 170px;
         top: auto;
-        max-height: 60vh;
+        max-height: 50vh;
         border-radius: 20px;
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(30px);
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
     }
     
     .pattern-toggle-controls:hover .pattern-selector-panel,
@@ -2017,20 +2030,22 @@ body[data-theme="gold"] {
         font-size: 0.75rem;
     }
     
-    /* Time mode controls - left side */
+    /* Time mode controls - inside gauge container for mobile */
     .time-mode-controls {
-        position: fixed;
-        top: auto;
-        bottom: 80px;
-        left: 20px;
-        z-index: 2000;
+        position: absolute !important;
+        bottom: auto !important;
+        top: 10px !important;
+        left: 10px !important;
+        z-index: 100;
     }
     
     .time-mode-icon {
-        width: 55px;
-        height: 55px;
-        font-size: 1.8rem;
-        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6);
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.7);
+        background: rgba(20, 20, 20, 0.95);
+        border: 2px solid var(--primary-color);
     }
     
     .time-mode-options {
@@ -2119,17 +2134,24 @@ body[data-theme="gold"] {
 /* Small mobile devices - Full width at top */
 @media (max-width: 480px) {
     .gauge-container {
-        /* All the way at the top, full width */
-        top: 8px;
-        left: 0;
-        right: 0;
-        transform: none;
+        /* All the way at the top, full width - locked position */
+        position: fixed !important;
+        top: 8px !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: none !important;
         padding: 18px 12px;
         gap: 15px;
         width: 100vw;
         max-width: none;
         min-height: 160px;
         border-radius: 0;
+        
+        /* Disable dragging */
+        cursor: default !important;
+        user-select: none;
+        -webkit-user-drag: none;
+        touch-action: none;
     }
     
     .gauge {
@@ -2204,18 +2226,23 @@ body[data-theme="gold"] {
         font-size: 0.65rem;
     }
     
-    /* Pattern selector */
+    /* Pattern selector - smaller for tiny screens */
+    .pattern-toggle-controls {
+        top: 8px !important;
+        right: 8px !important;
+    }
+    
     .pattern-toggle-icon {
-        width: 50px;
-        height: 50px;
+        width: 45px;
+        height: 45px;
     }
     
     .pattern-icon-symbol {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
     }
     
     .pattern-icon-text {
-        font-size: 0.5rem;
+        font-size: 0.45rem;
     }
     
     .pattern-selector-panel {
@@ -2250,10 +2277,15 @@ body[data-theme="gold"] {
         font-size: 0.7rem;
     }
     
-    /* Time mode */
+    /* Time mode - smaller for tiny screens */
+    .time-mode-controls {
+        top: 8px !important;
+        left: 8px !important;
+    }
+    
     .time-mode-icon {
-        width: 50px;
-        height: 50px;
+        width: 45px;
+        height: 45px;
         font-size: 1.5rem;
     }
     
