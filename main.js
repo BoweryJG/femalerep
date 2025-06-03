@@ -1053,45 +1053,46 @@ function createGaugeElement(label, value, maxValue = 100) {
         // Kill any existing animations
         gsap.killTweensOf(needle);
         
-        // Luxurious hover animation with weighted feel
+        // Luxurious hover animation with heavy weighted feel
         const hoverTimeline = gsap.timeline();
         
         hoverTimeline
-            // Elegant anticipation
+            // Slow, weighted anticipation - like lifting a heavy object
             .to(needle, {
-                rotation: currentNeedleValue * 1.8 - 90 - 15,
-                duration: 0.3,
-                ease: "power2.out"
+                rotation: currentNeedleValue * 1.8 - 90 - 8, // Smaller anticipation
+                duration: 0.8, // Slower wind-up
+                ease: "power2.inOut"
             })
-            // Dramatic weighted spin
+            // Heavy, luxurious spin with momentum
             .to(needle, {
-                rotation: "+=450", // 1.25 rotations
-                duration: 1.8,
-                ease: "power3.inOut",
+                rotation: "+=380", // Just over 1 rotation
+                duration: 3.5, // Much slower spin
+                ease: "power2.inOut", // Smooth, weighted ease
                 onUpdate: function() {
-                    // Add sophisticated momentum feel
+                    // Add very subtle weighted wobble
                     const progress = this.progress();
-                    const momentum = Math.sin(progress * Math.PI) * 3;
-                    if (progress > 0.7) {
+                    const wobble = Math.sin(progress * Math.PI * 4) * 0.8; // Subtle wobble
+                    if (progress > 0.8) {
                         gsap.set(needle, {
-                            rotation: gsap.getProperty(needle, "rotation") + momentum * (1 - progress)
+                            rotation: gsap.getProperty(needle, "rotation") + wobble * (1 - progress)
                         });
                     }
                 }
             })
-            // Precise luxury settle
+            // Slow, weighted settle - like a pendulum coming to rest
             .to(needle, {
                 rotation: currentNeedleValue * 1.8 - 90,
-                duration: 1.5,
-                ease: "elastic.out(1, 0.8)",
+                duration: 2.5, // Slow settle
+                ease: "power4.out", // Heavy ease out
                 onComplete: function() {
-                    // Resume subtle breathing
+                    // Resume luxurious breathing
                     gsap.to(needle, {
-                        rotation: currentNeedleValue * 1.8 - 90 + 1,
-                        duration: 2,
-                        ease: "sine.inOut",
+                        rotation: currentNeedleValue * 1.8 - 90 + 0.3,
+                        duration: 6,
+                        ease: "power1.inOut",
                         yoyo: true,
-                        repeat: -1
+                        repeat: -1,
+                        yoyoEase: "power1.inOut"
                     });
                 }
             });
@@ -1116,14 +1117,29 @@ function createGaugeElement(label, value, maxValue = 100) {
             parentGauge.dataset.currentValue = newValue;
         }
         
+        // Kill existing animations first
+        gsap.killTweensOf(needle);
+        
+        // Luxurious weighted value change animation
         gsap.to(needle, {
             rotation: newRotation,
-            duration: 1.5,
-            ease: "elastic.out(1, 0.3)",
+            duration: 3, // Slow, weighted movement
+            ease: "power4.inOut", // Heavy, smooth ease
             onUpdate: function() {
                 const currentRotation = gsap.getProperty(needle, "rotation");
                 const currentValue = Math.round((currentRotation + 90) / 1.8);
                 valueDisplay.textContent = `${currentValue}%`;
+            },
+            onComplete: function() {
+                // Resume breathing after value change
+                gsap.to(needle, {
+                    rotation: newRotation + 0.3,
+                    duration: 6,
+                    ease: "power1.inOut",
+                    yoyo: true,
+                    repeat: -1,
+                    yoyoEase: "power1.inOut"
+                });
             }
         });
         
@@ -1143,20 +1159,23 @@ function createGaugeElement(label, value, maxValue = 100) {
 
 // Add gauges to container
 const gaugeContainer = document.getElementById('gaugeContainer');
-const gauges = [
+
+// Check if mobile device
+const isMobile = window.innerWidth <= 768;
+
+// Define all gauges
+const allGauges = [
     { label: 'Revenue', value: 75 },
     { label: 'Deals', value: 60 },
-    { label: 'Clients', value: 85 }
+    { label: 'Clients', value: 85 },
+    { label: 'Growth', value: 92 }
 ];
 
-gauges.forEach((gauge, index) => {
-    const gaugeElement = createGaugeElement(gauge.label, gauge.value);
-    gaugeContainer.appendChild(gaugeElement);
-    
-    // Store initial value on the element
-    gaugeElement.dataset.currentValue = gauge.value;
-    
-    // Needle spin animation on load
+// Show only 2 gauges on mobile, all on desktop
+const gauges = isMobile ? allGauges.slice(0, 2) : allGauges;
+
+// Function to initialize gauge animations
+function initGaugeAnimations(gaugeElement, value, index) {
     const needle = gaugeElement.querySelector('.gauge-needle');
     const valueDisplay = gaugeElement.querySelector('.gauge-value');
     
@@ -1181,7 +1200,7 @@ gauges.forEach((gauge, index) => {
         })
         // Elegant deceleration and settle
         .to(needle, {
-            rotation: gauge.value * 1.8 - 90,
+            rotation: value * 1.8 - 90,
             duration: 3,
             ease: "power4.out",
             onUpdate: function() {
@@ -1194,20 +1213,32 @@ gauges.forEach((gauge, index) => {
         })
         // Final precision adjustment with luxury ease
         .to(needle, {
-            rotation: gauge.value * 1.8 - 90,
+            rotation: value * 1.8 - 90,
             duration: 1.2,
             ease: "back.out(1.7)",
             onComplete: function() {
-                // Add subtle breathing animation
+                // Add luxurious weighted breathing animation - slow and smooth
                 gsap.to(needle, {
-                    rotation: gauge.value * 1.8 - 90 + 1,
-                    duration: 2,
-                    ease: "sine.inOut",
+                    rotation: value * 1.8 - 90 + 0.3, // Very subtle movement
+                    duration: 6, // Slow, luxurious pace
+                    ease: "power1.inOut", // Smooth, weighted ease
                     yoyo: true,
-                    repeat: -1
+                    repeat: -1,
+                    yoyoEase: "power1.inOut" // Smooth return motion
                 });
             }
         });
+}
+
+gauges.forEach((gauge, index) => {
+    const gaugeElement = createGaugeElement(gauge.label, gauge.value);
+    gaugeContainer.appendChild(gaugeElement);
+    
+    // Store initial value on the element
+    gaugeElement.dataset.currentValue = gauge.value;
+    
+    // Initialize animations
+    initGaugeAnimations(gaugeElement, gauge.value, index);
 });
 
 // Sparkle effect
@@ -1800,14 +1831,29 @@ function updateDashboardData() {
             const newValue = Math.max(0, Math.min(100, currentValue + change));
             const newRotation = (newValue * 1.8) - 90;
             
+            // Kill any existing animations first
+            gsap.killTweensOf(needle);
+            
+            // Luxurious weighted real-time update animation
             gsap.to(needle, {
                 rotation: newRotation,
-                duration: 1.5,
-                ease: "power2.inOut",
+                duration: 4, // Much slower, weighted movement
+                ease: "power3.inOut", // Heavier, more luxurious ease
                 onUpdate: function() {
                     const currentRotation = gsap.getProperty(needle, "rotation");
                     const currentValue = Math.round((currentRotation + 90) / 1.8);
                     valueDisplay.textContent = `${currentValue}%`;
+                },
+                onComplete: function() {
+                    // Resume luxurious breathing animation after update
+                    gsap.to(needle, {
+                        rotation: newRotation + 0.3, // Very subtle breathing
+                        duration: 6, // Slow breathing pace
+                        ease: "power1.inOut",
+                        yoyo: true,
+                        repeat: -1,
+                        yoyoEase: "power1.inOut"
+                    });
                 }
             });
             
@@ -1867,7 +1913,12 @@ function makeElementDraggable(element) {
             xOffset = currentX;
             yOffset = currentY;
 
-            element.style.transform = `translate(${currentX}px, ${currentY}px)`;
+            // For the gauge container, we need to maintain centered transform
+            if (element.classList.contains('gauge-container')) {
+                element.style.transform = `translate(calc(-50% + ${currentX}px), calc(-50% + ${currentY}px))`;
+            } else {
+                element.style.transform = `translate(${currentX}px, ${currentY}px)`;
+            }
         }
     }
 
@@ -1961,29 +2012,136 @@ function makeGaugesDraggable() {
 // Initialize gauge dragging
 setTimeout(makeGaugesDraggable, 1000);
 
-// Pattern Toggle System
-document.querySelectorAll('.pattern-option').forEach(option => {
-    option.addEventListener('click', () => {
-        const pattern = option.getAttribute('data-pattern');
-        
-        // Remove active class from all options
-        document.querySelectorAll('.pattern-option').forEach(opt => opt.classList.remove('active'));
-        option.classList.add('active');
-        
-        // Apply pattern to gauge container
-        const gaugeContainer = document.getElementById('gaugeContainer');
-        gaugeContainer.setAttribute('data-leather-pattern', pattern);
-        
-        // Store preference
-        localStorage.setItem('leatherPattern', pattern);
-        
-        // Add luxury transition effect
-        gaugeContainer.style.transition = 'background 1s cubic-bezier(0.4, 0, 0.2, 1)';
-        setTimeout(() => {
-            gaugeContainer.style.transition = '';
-        }, 1000);
+// Pattern Toggle System with Enhanced Interactions
+function initPatternSelector() {
+    document.querySelectorAll('.pattern-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const pattern = option.getAttribute('data-pattern');
+            
+            // Remove active class from all options
+            document.querySelectorAll('.pattern-option').forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+            
+            // Apply pattern to gauge container
+            const gaugeContainer = document.getElementById('gaugeContainer');
+            gaugeContainer.setAttribute('data-leather-pattern', pattern);
+            
+            // Store preference
+            localStorage.setItem('leatherPattern', pattern);
+            
+            // Add luxury transition effect
+            gaugeContainer.style.transition = 'background 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            // Add pattern change animation
+            gaugeContainer.classList.add('pattern-changing');
+            setTimeout(() => {
+                gaugeContainer.style.transition = '';
+                gaugeContainer.classList.remove('pattern-changing');
+            }, 1500);
+            
+            // Trigger luxurious weighted needle celebration animation
+            document.querySelectorAll('.gauge-needle').forEach((needle, index) => {
+                // Get current value for this needle
+                const gauge = needle.closest('.gauge');
+                const currentValue = parseInt(gauge?.dataset.currentValue || 50);
+                const baseRotation = currentValue * 1.8 - 90;
+                
+                // Kill any existing animations
+                gsap.killTweensOf(needle);
+                
+                // Luxurious weighted celebration spin
+                gsap.timeline()
+                    .to(needle, {
+                        rotation: baseRotation - 15, // Subtle anticipation
+                        duration: 0.8,
+                        delay: index * 0.15,
+                        ease: "power2.inOut"
+                    })
+                    .to(needle, {
+                        rotation: baseRotation + 365, // Just over 1 rotation
+                        duration: 3.5, // Slow, luxurious spin
+                        ease: "power3.inOut" // Heavy, weighted ease
+                    })
+                    .to(needle, {
+                        rotation: baseRotation,
+                        duration: 2, // Slow settle
+                        ease: "power4.out",
+                        onComplete: function() {
+                            // Resume breathing animation
+                            gsap.to(needle, {
+                                rotation: baseRotation + 0.3,
+                                duration: 6,
+                                ease: "power1.inOut",
+                                yoyo: true,
+                                repeat: -1,
+                                yoyoEase: "power1.inOut"
+                            });
+                        }
+                    });
+            });
+        });
     });
-});
+}
+
+// Initialize pattern selector
+initPatternSelector();
+
+// Mobile touch support for pattern selector
+if ('ontouchstart' in window) {
+    const patternToggle = document.querySelector('.pattern-toggle-icon');
+    const timeToggle = document.querySelector('.time-mode-icon');
+    const themeToggle = document.querySelector('.theme-toggle-icon');
+    
+    // Pattern selector touch
+    if (patternToggle) {
+        patternToggle.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const panel = document.querySelector('.pattern-selector-panel');
+            if (panel) {
+                panel.style.opacity = panel.style.opacity === '1' ? '0' : '1';
+                panel.style.visibility = panel.style.visibility === 'visible' ? 'hidden' : 'visible';
+            }
+        });
+    }
+    
+    // Time mode touch
+    if (timeToggle) {
+        timeToggle.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const options = document.querySelector('.time-mode-options');
+            if (options) {
+                options.style.opacity = options.style.opacity === '1' ? '0' : '1';
+                options.style.visibility = options.style.visibility === 'visible' ? 'hidden' : 'visible';
+            }
+        });
+    }
+    
+    // Theme toggle touch
+    if (themeToggle) {
+        themeToggle.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const options = document.querySelector('.theme-options');
+            if (options) {
+                options.style.opacity = options.style.opacity === '1' ? '0' : '1';
+                options.style.visibility = options.style.visibility === 'visible' ? 'hidden' : 'visible';
+            }
+        });
+    }
+    
+    // Close panels on outside touch
+    document.addEventListener('touchstart', (e) => {
+        if (!e.target.closest('.pattern-toggle-controls') && 
+            !e.target.closest('.time-mode-controls') && 
+            !e.target.closest('.theme-toggle')) {
+            
+            const panels = document.querySelectorAll('.pattern-selector-panel, .time-mode-options, .theme-options');
+            panels.forEach(panel => {
+                panel.style.opacity = '0';
+                panel.style.visibility = 'hidden';
+            });
+        }
+    });
+}
 
 // Time Mode System
 let currentTimeMode = 'day';
@@ -1991,9 +2149,13 @@ let currentTimeMode = 'day';
 function updateTimeMode(mode) {
     currentTimeMode = mode;
     
-    // Update active state
+    // Update active state for time mode options
     document.querySelectorAll('.time-mode-option').forEach(opt => opt.classList.remove('active'));
-    document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+    document.querySelector(`[data-mode="${mode}"]`)?.classList.add('active');
+    
+    // Update time indicator dots in pattern selector
+    document.querySelectorAll('.time-dot').forEach(dot => dot.classList.remove('active'));
+    document.querySelector(`.time-dot[data-time="${mode}"]`)?.classList.add('active');
     
     // Update scene lighting and colors
     updateSceneLighting(mode);
@@ -2003,6 +2165,24 @@ function updateTimeMode(mode) {
     
     // Store preference
     localStorage.setItem('timeMode', mode);
+    
+    // Animate pattern previews color transition
+    const patternPreviews = document.querySelectorAll('.pattern-preview');
+    patternPreviews.forEach((preview, index) => {
+        gsap.to(preview, {
+            scale: 0.9,
+            duration: 0.3,
+            delay: index * 0.05,
+            ease: "power2.in",
+            onComplete: function() {
+                gsap.to(preview, {
+                    scale: 1,
+                    duration: 0.5,
+                    ease: "elastic.out(1, 0.5)"
+                });
+            }
+        });
+    });
 }
 
 function updateSceneLighting(mode) {
@@ -2100,6 +2280,26 @@ document.querySelectorAll('.time-mode-option').forEach(option => {
     option.addEventListener('click', () => {
         const mode = option.getAttribute('data-mode');
         updateTimeMode(mode);
+    });
+});
+
+// Time dot click handlers in pattern selector
+document.querySelectorAll('.time-dot').forEach(dot => {
+    dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const mode = dot.getAttribute('data-time');
+        updateTimeMode(mode);
+        
+        // Update time mode icon
+        const timeModeIcon = document.querySelector('.time-mode-icon');
+        if (timeModeIcon) {
+            const icons = {
+                'day': '☀️',
+                'dusk': '🌅',
+                'night': '🌙'
+            };
+            timeModeIcon.textContent = icons[mode] || '🌅';
+        }
     });
 });
 
@@ -2250,6 +2450,49 @@ function makeUIElementsDraggable() {
 
 // Initialize UI dragging after a delay to ensure elements are loaded
 setTimeout(makeUIElementsDraggable, 1500);
+
+// Handle window resize for responsive layout
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        const currentIsMobile = window.innerWidth <= 768;
+        const gaugeCount = gaugeContainer.querySelectorAll('.gauge').length;
+        
+        // If switching between mobile and desktop, update gauge count
+        if ((currentIsMobile && gaugeCount > 2) || (!currentIsMobile && gaugeCount < allGauges.length)) {
+            // Clear existing gauges
+            gaugeContainer.innerHTML = '';
+            
+            // Re-add leather stitching
+            ['top', 'bottom', 'left', 'right'].forEach(position => {
+                const stitch = document.createElement('div');
+                stitch.className = `leather-stitching ${position}-stitch`;
+                gaugeContainer.appendChild(stitch);
+            });
+            
+            // Re-add pattern and time controls
+            const patternControls = document.querySelector('.pattern-toggle-controls');
+            const timeControls = document.querySelector('.time-mode-controls');
+            if (patternControls) gaugeContainer.appendChild(patternControls);
+            if (timeControls) gaugeContainer.appendChild(timeControls);
+            
+            // Add appropriate number of gauges
+            const gaugesToShow = currentIsMobile ? allGauges.slice(0, 2) : allGauges;
+            gaugesToShow.forEach((gauge, index) => {
+                const gaugeElement = createGaugeElement(gauge.label, gauge.value);
+                gaugeContainer.appendChild(gaugeElement);
+                gaugeElement.dataset.currentValue = gauge.value;
+                
+                // Re-initialize animations
+                initGaugeAnimations(gaugeElement, gauge.value, index);
+            });
+            
+            // Re-initialize gauge dragging
+            setTimeout(makeGaugesDraggable, 100);
+        }
+    }, 250);
+});
 
 // Theme switching functionality
 document.querySelectorAll('.theme-option').forEach(option => {

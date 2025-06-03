@@ -75,9 +75,9 @@ body {
 
 .gauge-container {
     position: absolute;
-    bottom: 30px;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     display: flex;
     gap: 40px;
     padding: 40px;
@@ -92,6 +92,9 @@ body {
         inset 0 -2px 4px rgba(0, 0, 0, 0.3);
     position: relative;
     overflow: hidden;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90vw;
 }
 
 .gauge-container::before {
@@ -843,7 +846,19 @@ body {
         );
 }
 
-/* Exotic Material Pattern Variations */
+/* Pattern Preview Thumbnails */
+.alligator-preview { background: var(--alligator-preview-bg); }
+.zebra-preview { background: var(--zebra-preview-bg); }
+.leopard-preview { background: var(--leopard-preview-bg); }
+.ostrich-preview { background: var(--ostrich-preview-bg); }
+.snake-preview { background: var(--snake-preview-bg); }
+.tiger-preview { background: var(--tiger-preview-bg); }
+.stingray-preview { background: var(--stingray-preview-bg); }
+.elephant-preview { background: var(--elephant-preview-bg); }
+.giraffe-preview { background: var(--giraffe-preview-bg); }
+.cheetah-preview { background: var(--cheetah-preview-bg); }
+
+/* Exotic Material Pattern Variations with Time-Based Color Enrichment */
 
 /* Alligator/Crocodile - Realistic Scale Pattern */
 .gauge-container[data-leather-pattern="alligator"] {
@@ -1096,7 +1111,60 @@ body {
     background-size: 100% 100%, 60px 60px, 45px 45px, 38px 38px, 55px 55px;
 }
 
-/* Pattern Toggle Controls */
+/* Giraffe - Mosaic Patch Pattern */
+.gauge-container[data-leather-pattern="giraffe"] {
+    --leather-pattern: 
+        /* Base giraffe tan */
+        linear-gradient(135deg, 
+            rgba(255, 228, 181, 0.95) 0%, 
+            rgba(255, 239, 213, 0.9) 50%, 
+            rgba(255, 228, 181, 0.95) 100%
+        ),
+        /* Large irregular patches */
+        radial-gradient(ellipse 25px 35px at 30px 25px, 
+            rgba(139, 69, 19, 0.8) 45%, 
+            transparent 50%),
+        radial-gradient(ellipse 30px 25px at 70px 50px, 
+            rgba(160, 82, 45, 0.75) 45%, 
+            transparent 50%),
+        radial-gradient(ellipse 20px 30px at 20px 70px, 
+            rgba(139, 69, 19, 0.8) 45%, 
+            transparent 50%),
+        radial-gradient(ellipse 35px 20px at 80px 20px, 
+            rgba(128, 64, 0, 0.7) 45%, 
+            transparent 50%),
+        /* Smaller patches */
+        radial-gradient(ellipse 15px 20px at 50px 35px, 
+            rgba(139, 69, 19, 0.6) 40%, 
+            transparent 45%),
+        radial-gradient(ellipse 18px 15px at 10px 45px, 
+            rgba(160, 82, 45, 0.6) 40%, 
+            transparent 45%);
+    background-size: 100% 100%, 100px 100px, 100px 100px, 100px 100px, 100px 100px, 100px 100px, 100px 100px;
+}
+
+/* Cheetah - Small Solid Spots Pattern */
+.gauge-container[data-leather-pattern="cheetah"] {
+    --leather-pattern: 
+        /* Base cheetah golden */
+        linear-gradient(135deg, 
+            rgba(255, 204, 102, 0.95) 0%, 
+            rgba(255, 223, 153, 0.9) 50%, 
+            rgba(255, 204, 102, 0.95) 100%
+        ),
+        /* Dense small spots */
+        radial-gradient(circle 4px at 15px 15px, rgba(0, 0, 0, 0.8) 50%, transparent 60%),
+        radial-gradient(circle 3px at 30px 10px, rgba(0, 0, 0, 0.7) 50%, transparent 60%),
+        radial-gradient(circle 4px at 45px 20px, rgba(0, 0, 0, 0.8) 50%, transparent 60%),
+        radial-gradient(circle 3px at 10px 35px, rgba(0, 0, 0, 0.7) 50%, transparent 60%),
+        radial-gradient(circle 5px at 35px 40px, rgba(0, 0, 0, 0.8) 50%, transparent 60%),
+        radial-gradient(circle 3px at 55px 35px, rgba(0, 0, 0, 0.7) 50%, transparent 60%),
+        radial-gradient(circle 4px at 25px 55px, rgba(0, 0, 0, 0.8) 50%, transparent 60%),
+        radial-gradient(circle 3px at 50px 50px, rgba(0, 0, 0, 0.7) 50%, transparent 60%);
+    background-size: 100% 100%, 60px 60px, 60px 60px, 60px 60px, 60px 60px, 60px 60px, 60px 60px, 60px 60px, 60px 60px;
+}
+
+/* Pattern Toggle Controls - Luxury Expandable Selector */
 .pattern-toggle-controls {
     position: absolute;
     top: 15px;
@@ -1105,69 +1173,340 @@ body {
 }
 
 .pattern-toggle-icon {
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    width: 80px;
+    height: 80px;
+    background: var(--pattern-selector-bg, rgba(20, 20, 20, 0.9));
+    backdrop-filter: blur(20px);
     border-radius: 50%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
     cursor: pointer;
-    border: 1px solid rgba(255, 215, 0, 0.3);
+    border: 2px solid var(--pattern-selector-border, rgba(255, 215, 0, 0.4));
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.4),
+        inset 0 0 30px var(--pattern-selector-glow, rgba(255, 215, 0, 0.2));
+    position: relative;
+    overflow: hidden;
+}
+
+.pattern-toggle-icon::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        var(--primary-color) 0deg,
+        var(--secondary-color) 90deg,
+        var(--accent-color) 180deg,
+        var(--primary-color) 270deg,
+        var(--primary-color) 360deg
+    );
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: -1;
+    animation: rotateGradient 8s linear infinite paused;
+}
+
+.pattern-toggle-icon:hover::before {
+    opacity: 1;
+    animation-play-state: running;
+}
+
+@keyframes rotateGradient {
+    to { transform: rotate(360deg); }
+}
+
+.pattern-icon-symbol {
+    font-size: 2rem;
     transition: all 0.3s ease;
+}
+
+.pattern-icon-text {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+    color: var(--ui-text);
 }
 
 .pattern-toggle-icon:hover {
-    transform: scale(1.1) rotate(90deg);
-    border-color: rgba(255, 215, 0, 0.6);
-    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+    transform: scale(1.1);
+    border-color: var(--primary-color);
+    box-shadow: 
+        0 15px 60px rgba(0, 0, 0, 0.5),
+        0 0 60px var(--gauge-glow),
+        inset 0 0 40px var(--pattern-selector-glow, rgba(255, 215, 0, 0.3));
 }
 
-.pattern-options {
+.pattern-toggle-icon:hover .pattern-icon-symbol {
+    transform: rotate(180deg);
+}
+
+/* Pattern Selector Panel */
+.pattern-selector-panel {
     position: absolute;
-    top: 50px;
-    right: 0;
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(20px);
-    border-radius: 15px;
-    padding: 10px;
+    top: 90px;
+    right: -10px;
+    width: 380px;
+    max-height: 0;
+    overflow: hidden;
+    background: var(--panel-bg);
+    backdrop-filter: blur(30px);
+    border-radius: 25px;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    min-width: 180px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--panel-border);
+    box-shadow: 
+        0 20px 80px rgba(0, 0, 0, 0.6),
+        0 0 40px var(--panel-glow);
 }
 
-.pattern-toggle-controls:hover .pattern-options {
+.pattern-toggle-controls:hover .pattern-selector-panel {
+    max-height: 600px;
     opacity: 1;
     visibility: visible;
-    top: 55px;
 }
 
-.pattern-option {
-    padding: 12px 16px;
-    margin: 3px 0;
-    border-radius: 10px;
-    cursor: pointer;
+.pattern-selector-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pattern-selector-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.pattern-time-indicator {
+    display: flex;
+    gap: 8px;
+}
+
+.time-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
-    font-family: 'Roboto', sans-serif;
-    font-size: 0.85rem;
-    color: #ffffff;
+    cursor: pointer;
+}
+
+.time-dot[data-time="day"] { background: #FFD700; }
+.time-dot[data-time="dusk"] { background: #FF6347; }
+.time-dot[data-time="night"] { background: #4169E1; }
+
+.time-dot.active {
+    transform: scale(1.3);
+    box-shadow: 0 0 20px currentColor;
+}
+
+/* Scrollable Pattern Options */
+.pattern-options-scroll {
+    max-height: 480px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+}
+
+.pattern-options-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.pattern-options-scroll::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
-    text-align: center;
+    border-radius: 3px;
+}
+
+.pattern-options-scroll::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 3px;
+}
+
+/* Pattern Option Item */
+.pattern-option {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--pattern-option-bg, rgba(255, 255, 255, 0.03));
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.pattern-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--primary-color) 50%, 
+        transparent 100%
+    );
+    opacity: 0.3;
+    transition: left 0.5s ease;
+}
+
+.pattern-option:hover::before {
+    left: 100%;
 }
 
 .pattern-option:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateX(-3px);
+    background: var(--pattern-option-hover-bg, rgba(255, 255, 255, 0.08));
+    transform: translateX(-5px);
+    border-color: var(--primary-color);
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.3),
+        inset 0 0 20px var(--pattern-option-glow);
 }
 
 .pattern-option.active {
-    background: linear-gradient(135deg, #FFD700 0%, #FF1493 100%);
-    color: #000000;
-    font-weight: 500;
+    background: var(--pattern-option-active-bg);
+    border-color: var(--primary-color);
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.4),
+        inset 0 0 30px var(--pattern-option-glow);
+}
+
+/* Pattern Preview Thumbnails */
+.pattern-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background-size: 40px 40px;
+    background-position: center;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.pattern-option:hover .pattern-preview {
+    transform: scale(1.1) rotate(5deg);
+    border-color: var(--primary-color);
+}
+
+/* Pattern Info */
+.pattern-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.pattern-icon {
+    font-size: 1.8rem;
+    filter: saturate(1.5);
+}
+
+.pattern-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ui-text);
+}
+
+.pattern-subtitle {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    font-style: italic;
+}
+
+/* Time-based Panel Styling & Pattern Color Enrichment */
+body[data-time-mode="day"] {
+    --panel-bg: rgba(255, 255, 255, 0.05);
+    --panel-border: rgba(255, 215, 0, 0.3);
+    --panel-glow: rgba(255, 215, 0, 0.2);
+    --pattern-selector-bg: rgba(255, 255, 255, 0.08);
+    --pattern-selector-border: rgba(255, 215, 0, 0.4);
+    --pattern-selector-glow: rgba(255, 215, 0, 0.2);
+    --pattern-option-bg: rgba(255, 255, 255, 0.03);
+    --pattern-option-hover-bg: rgba(255, 215, 0, 0.1);
+    --pattern-option-active-bg: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 20, 147, 0.1) 100%);
+    --pattern-option-glow: rgba(255, 215, 0, 0.1);
+    
+    /* Pattern Preview Colors - Day */
+    --alligator-preview-bg: linear-gradient(135deg, #556B2F 0%, #8B7355 100%);
+    --zebra-preview-bg: repeating-linear-gradient(15deg, #FFFFFF 0px, #FFFFFF 8px, #000000 8px, #000000 16px);
+    --leopard-preview-bg: radial-gradient(circle at 30% 30%, #FFD700, #DAA520);
+    --ostrich-preview-bg: radial-gradient(ellipse at 40% 40%, #D2691E, #A0522D);
+    --snake-preview-bg: conic-gradient(from 45deg, #556B2F, #808000, #556B2F);
+    --tiger-preview-bg: repeating-linear-gradient(95deg, #FF8C00 0px, #FF8C00 6px, #000000 6px, #000000 12px);
+    --stingray-preview-bg: radial-gradient(circle at 50% 50%, #708090, #2F4F4F);
+    --elephant-preview-bg: linear-gradient(135deg, #696969, #808080);
+    --giraffe-preview-bg: radial-gradient(ellipse at 30% 30%, #FFE4B5, #DEB887);
+    --cheetah-preview-bg: radial-gradient(circle at 40% 40%, #FFCC66, #FFD700);
+}
+
+body[data-time-mode="dusk"] {
+    --panel-bg: rgba(139, 69, 19, 0.1);
+    --panel-border: rgba(255, 99, 71, 0.4);
+    --panel-glow: rgba(255, 99, 71, 0.3);
+    --pattern-selector-bg: rgba(139, 69, 19, 0.15);
+    --pattern-selector-border: rgba(255, 140, 0, 0.5);
+    --pattern-selector-glow: rgba(255, 99, 71, 0.3);
+    --pattern-option-bg: rgba(139, 69, 19, 0.08);
+    --pattern-option-hover-bg: rgba(255, 99, 71, 0.15);
+    --pattern-option-active-bg: linear-gradient(135deg, rgba(255, 99, 71, 0.3) 0%, rgba(255, 140, 0, 0.2) 100%);
+    --pattern-option-glow: rgba(255, 99, 71, 0.15);
+    
+    /* Pattern Preview Colors - Dusk (Warm Sunset Tones) */
+    --alligator-preview-bg: linear-gradient(135deg, #8B4513 0%, #CD853F 100%);
+    --zebra-preview-bg: repeating-linear-gradient(15deg, #FFF5EE 0px, #FFF5EE 8px, #4B0000 8px, #4B0000 16px);
+    --leopard-preview-bg: radial-gradient(circle at 30% 30%, #FF6347, #CD5C5C);
+    --ostrich-preview-bg: radial-gradient(ellipse at 40% 40%, #E9967A, #FA8072);
+    --snake-preview-bg: conic-gradient(from 45deg, #8B4513, #D2691E, #8B4513);
+    --tiger-preview-bg: repeating-linear-gradient(95deg, #FF6347 0px, #FF6347 6px, #8B0000 6px, #8B0000 12px);
+    --stingray-preview-bg: radial-gradient(circle at 50% 50%, #BC8F8F, #8B4513);
+    --elephant-preview-bg: linear-gradient(135deg, #A0522D, #8B7355);
+    --giraffe-preview-bg: radial-gradient(ellipse at 30% 30%, #FFDAB9, #F4A460);
+    --cheetah-preview-bg: radial-gradient(circle at 40% 40%, #FFA07A, #FF8C00);
+}
+
+body[data-time-mode="night"] {
+    --panel-bg: rgba(25, 25, 112, 0.15);
+    --panel-border: rgba(135, 206, 235, 0.4);
+    --panel-glow: rgba(135, 206, 235, 0.3);
+    --pattern-selector-bg: rgba(25, 25, 112, 0.2);
+    --pattern-selector-border: rgba(65, 105, 225, 0.5);
+    --pattern-selector-glow: rgba(135, 206, 235, 0.3);
+    --pattern-option-bg: rgba(25, 25, 112, 0.1);
+    --pattern-option-hover-bg: rgba(135, 206, 235, 0.15);
+    --pattern-option-active-bg: linear-gradient(135deg, rgba(135, 206, 235, 0.3) 0%, rgba(65, 105, 225, 0.2) 100%);
+    --pattern-option-glow: rgba(135, 206, 235, 0.15);
+    
+    /* Pattern Preview Colors - Night (Cool Moonlit Tones) */
+    --alligator-preview-bg: linear-gradient(135deg, #2F4F4F 0%, #483D8B 100%);
+    --zebra-preview-bg: repeating-linear-gradient(15deg, #E6E6FA 0px, #E6E6FA 8px, #191970 8px, #191970 16px);
+    --leopard-preview-bg: radial-gradient(circle at 30% 30%, #6495ED, #4169E1);
+    --ostrich-preview-bg: radial-gradient(ellipse at 40% 40%, #778899, #708090);
+    --snake-preview-bg: conic-gradient(from 45deg, #2F4F4F, #4682B4, #2F4F4F);
+    --tiger-preview-bg: repeating-linear-gradient(95deg, #4169E1 0px, #4169E1 6px, #000080 6px, #000080 12px);
+    --stingray-preview-bg: radial-gradient(circle at 50% 50%, #B0C4DE, #4682B4);
+    --elephant-preview-bg: linear-gradient(135deg, #5F9EA0, #708090);
+    --giraffe-preview-bg: radial-gradient(ellipse at 30% 30%, #E0FFFF, #B0E0E6);
+    --cheetah-preview-bg: radial-gradient(circle at 40% 40%, #87CEEB, #6495ED);
 }
 
 /* Time Mode Controls */
@@ -1351,6 +1690,34 @@ body[data-time-mode="night"] .time-mode-options {
     transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Pattern changing animation */
+.gauge-container.pattern-changing {
+    animation: luxuryPatternShift 1.5s ease-in-out;
+}
+
+@keyframes luxuryPatternShift {
+    0% {
+        transform: translateX(-50%) scale(1);
+        filter: brightness(1);
+    }
+    25% {
+        transform: translateX(-50%) scale(0.98);
+        filter: brightness(1.2) saturate(1.5);
+    }
+    50% {
+        transform: translateX(-50%) scale(0.97);
+        filter: brightness(1.4) saturate(2) hue-rotate(10deg);
+    }
+    75% {
+        transform: translateX(-50%) scale(0.98);
+        filter: brightness(1.2) saturate(1.5);
+    }
+    100% {
+        transform: translateX(-50%) scale(1);
+        filter: brightness(1);
+    }
+}
+
 /* Enhanced gauge animations based on time mode */
 body[data-time-mode="night"] .gauge-center {
     animation: jewelPulse 4s ease-in-out infinite, moonGlow 6s ease-in-out infinite;
@@ -1432,4 +1799,426 @@ body[data-theme="gold"] {
     --accent-color: #FFB6C1;
     --gauge-glow: rgba(255, 215, 0, 0.8);
     --needle-gradient: linear-gradient(to top, transparent 0%, #8B0000 20%, #FF1493 40%, #FFD700 80%, #FFFFFF 100%);
+}
+
+/* Responsive Design - Mobile Optimized with All Luxury Details */
+@media (max-width: 768px) {
+    .gauge-container {
+        gap: 25px;
+        padding: 30px;
+        width: 92vw;
+        max-width: 440px;
+        border-radius: 25px;
+    }
+    
+    .gauge {
+        width: 160px;
+        height: 160px;
+    }
+    
+    /* Show only 2 gauges on mobile */
+    .gauge:nth-child(n+3) {
+        display: none;
+    }
+    
+    .gauge-label {
+        font-size: 0.85rem;
+        bottom: -28px;
+    }
+    
+    .gauge-value {
+        font-size: 1.9rem;
+        bottom: 12px;
+    }
+    
+    .gauge-number {
+        font-size: 0.65rem;
+        top: 18px;
+    }
+    
+    .gauge-needle {
+        height: 42%;
+    }
+    
+    .gauge-center {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .gauge-tick {
+        height: 10px;
+        top: 5px;
+    }
+    
+    .gauge-tick.major {
+        height: 14px;
+    }
+    
+    /* Brand mark - move to center top */
+    .brand-mark {
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        gap: 12px;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .brand-icon {
+        font-size: 2.2rem;
+    }
+    
+    .brand-name {
+        font-size: 1.4rem;
+    }
+    
+    /* Stats panel - bottom position */
+    .stats-panel {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+        top: auto;
+        padding: 12px 25px;
+        gap: 20px;
+        flex-direction: row;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
+    }
+    
+    .stat-value {
+        font-size: 1.3rem;
+    }
+    
+    /* Pattern selector - full width overlay */
+    .pattern-toggle-controls {
+        position: fixed;
+        top: auto;
+        bottom: 80px;
+        right: 20px;
+        z-index: 2000;
+    }
+    
+    .pattern-toggle-icon {
+        width: 55px;
+        height: 55px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6);
+    }
+    
+    .pattern-icon-symbol {
+        font-size: 1.4rem;
+    }
+    
+    .pattern-icon-text {
+        font-size: 0.55rem;
+        letter-spacing: 0.08em;
+    }
+    
+    .pattern-selector-panel {
+        position: fixed;
+        width: 90vw;
+        max-width: 380px;
+        right: 50%;
+        transform: translateX(50%);
+        bottom: 150px;
+        top: auto;
+        max-height: 60vh;
+        border-radius: 20px;
+    }
+    
+    .pattern-toggle-controls:hover .pattern-selector-panel,
+    .pattern-toggle-controls:active .pattern-selector-panel,
+    .pattern-toggle-controls:focus-within .pattern-selector-panel {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .pattern-selector-header {
+        padding: 15px;
+    }
+    
+    .pattern-selector-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .pattern-options-scroll {
+        max-height: calc(60vh - 80px);
+        padding: 10px;
+    }
+    
+    .pattern-option {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+    
+    .pattern-preview {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+    }
+    
+    .pattern-info {
+        gap: 3px;
+    }
+    
+    .pattern-icon {
+        font-size: 1.5rem;
+    }
+    
+    .pattern-name {
+        font-size: 1rem;
+    }
+    
+    .pattern-subtitle {
+        font-size: 0.75rem;
+    }
+    
+    /* Time mode controls - left side */
+    .time-mode-controls {
+        position: fixed;
+        top: auto;
+        bottom: 80px;
+        left: 20px;
+        z-index: 2000;
+    }
+    
+    .time-mode-icon {
+        width: 55px;
+        height: 55px;
+        font-size: 1.8rem;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6);
+    }
+    
+    .time-mode-options {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 150px;
+        top: auto;
+        width: 200px;
+        border-radius: 15px;
+    }
+    
+    .time-mode-controls:hover .time-mode-options,
+    .time-mode-controls:active .time-mode-options,
+    .time-mode-controls:focus-within .time-mode-options {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Theme toggle - compact mobile version */
+    .theme-toggle {
+        position: fixed;
+        right: 50%;
+        transform: translateX(50%);
+        top: auto;
+        bottom: 20px;
+        z-index: 1500;
+    }
+    
+    .theme-toggle-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .theme-options {
+        bottom: 50px;
+        top: auto;
+        right: 50%;
+        transform: translateX(50%);
+        width: 220px;
+        max-height: 300px;
+        overflow-y: auto;
+        border-radius: 15px;
+    }
+    
+    .theme-toggle:hover .theme-options {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .theme-option {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+    }
+    
+    /* Keep leather stitching but make it subtle */
+    .leather-stitching {
+        opacity: 0.5;
+    }
+    
+    .top-stitch, .bottom-stitch {
+        height: 1px;
+        top: 8px;
+        bottom: 8px;
+    }
+    
+    .left-stitch, .right-stitch {
+        width: 1px;
+        left: 8px;
+        right: 8px;
+    }
+    
+    /* Bezel adjustments */
+    .bezel-jewel {
+        width: 4px;
+        height: 4px;
+    }
+    
+    .jewel-sparkle {
+        width: 8px;
+        height: 8px;
+    }
+}
+
+/* Small mobile devices - Compact but Luxurious */
+@media (max-width: 480px) {
+    .gauge-container {
+        padding: 20px;
+        gap: 20px;
+        width: 95vw;
+        max-width: 340px;
+    }
+    
+    .gauge {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .gauge-center {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .gauge-needle {
+        height: 41%;
+        width: 2.5px;
+    }
+    
+    .gauge-value {
+        font-size: 1.6rem;
+        bottom: 10px;
+    }
+    
+    .gauge-label {
+        font-size: 0.8rem;
+        bottom: -25px;
+    }
+    
+    .gauge-number {
+        font-size: 0.6rem;
+        top: 15px;
+    }
+    
+    /* Brand adjustments */
+    .brand-icon {
+        font-size: 1.8rem;
+    }
+    
+    .brand-name {
+        font-size: 1.2rem;
+    }
+    
+    /* Stats panel */
+    .stats-panel {
+        padding: 10px 20px;
+        gap: 15px;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .stat-label {
+        font-size: 0.65rem;
+    }
+    
+    /* Pattern selector */
+    .pattern-toggle-icon {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .pattern-icon-symbol {
+        font-size: 1.2rem;
+    }
+    
+    .pattern-icon-text {
+        font-size: 0.5rem;
+    }
+    
+    .pattern-selector-panel {
+        width: 92vw;
+        max-width: 340px;
+        max-height: 55vh;
+    }
+    
+    .pattern-options-scroll {
+        max-height: calc(55vh - 70px);
+    }
+    
+    .pattern-option {
+        padding: 10px;
+        margin-bottom: 6px;
+    }
+    
+    .pattern-preview {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .pattern-icon {
+        font-size: 1.3rem;
+    }
+    
+    .pattern-name {
+        font-size: 0.95rem;
+    }
+    
+    .pattern-subtitle {
+        font-size: 0.7rem;
+    }
+    
+    /* Time mode */
+    .time-mode-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    .time-mode-options {
+        width: 180px;
+    }
+    
+    .time-mode-option {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    /* Bezel jewels */
+    .bezel-jewel {
+        width: 3px;
+        height: 3px;
+    }
+    
+    /* Complications */
+    .complication {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .complication-hand {
+        height: 12px;
+    }
 }
