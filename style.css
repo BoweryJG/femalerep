@@ -1801,75 +1801,86 @@ body[data-theme="gold"] {
     --needle-gradient: linear-gradient(to top, transparent 0%, #8B0000 20%, #FF1493 40%, #FFD700 80%, #FFFFFF 100%);
 }
 
+/* Force gauge visibility on mobile - override any JavaScript hiding */
+@media (max-width: 768px) {
+    .gauge {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}
+
 /* Responsive Design - Mobile Optimized with All Luxury Details */
 @media (max-width: 768px) {
     .gauge-container {
         /* Position pad at top center of screen */
         position: fixed;
-        top: 100px; /* Below brand mark */
+        top: 110px; /* Below brand mark */
         left: 50%;
         transform: translateX(-50%);
         
-        /* Larger sizing optimized for 2 gauges on mobile */
-        gap: 30px;
-        padding: 35px 25px;
-        width: 95vw;
-        max-width: 500px;
+        /* Much larger sizing for mobile - prioritize visibility */
+        gap: 25px;
+        padding: 40px 30px;
+        width: 96vw;
+        max-width: 550px;
+        min-height: 300px; /* Ensure minimum height */
         border-radius: 25px;
         
         /* Ensure proper flex layout */
-        display: flex;
+        display: flex !important;
         justify-content: center;
         align-items: center;
         flex-wrap: nowrap;
+        visibility: visible !important;
     }
     
     .gauge {
-        width: 180px;
-        height: 180px;
+        width: 200px !important;
+        height: 200px !important;
         flex-shrink: 0;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
     
-    /* Show only 2 gauges on mobile - more specific selector */
-    .gauge:nth-of-type(n+3) {
-        display: none !important;
-    }
+    /* Remove the nth-of-type hiding - let JavaScript handle it */
     
     .gauge-label {
-        font-size: 0.9rem;
-        bottom: -30px;
+        font-size: 1rem !important;
+        bottom: -35px;
         letter-spacing: 0.1em;
     }
     
     .gauge-value {
-        font-size: 2.1rem;
-        bottom: 15px;
+        font-size: 2.4rem !important;
+        bottom: 18px;
     }
     
     .gauge-number {
-        font-size: 0.7rem;
-        top: 20px;
-        transform-origin: center 85px; /* Adjusted for 180px gauge */
+        font-size: 0.75rem !important;
+        top: 22px;
+        transform-origin: center 95px; /* Adjusted for 200px gauge */
     }
     
     .gauge-needle {
-        height: 43%;
-        width: 3px;
+        height: 44% !important;
+        width: 3px !important;
     }
     
     .gauge-center {
-        width: 28px;
-        height: 28px;
+        width: 30px !important;
+        height: 30px !important;
     }
     
     .gauge-tick {
-        height: 12px;
-        top: 6px;
-        transform-origin: center 85px; /* Adjusted for 180px gauge */
+        height: 14px !important;
+        top: 7px;
+        transform-origin: center 95px; /* Adjusted for 200px gauge */
     }
     
     .gauge-tick.major {
-        height: 16px;
+        height: 18px !important;
     }
     
     /* Brand mark - compact at very top */
@@ -2103,57 +2114,60 @@ body[data-theme="gold"] {
     }
 }
 
-/* Small mobile devices - Still optimized for 2 gauges */
+/* Small mobile devices - Still large enough for 2 gauges */
 @media (max-width: 480px) {
     .gauge-container {
-        /* Keep top positioning but optimize for smaller screens */
-        top: 90px;
-        padding: 30px 20px;
-        gap: 25px;
+        /* Keep top positioning but ensure good size */
+        top: 100px;
+        padding: 35px 25px;
+        gap: 20px;
         width: 98vw;
-        max-width: 420px;
-        border-radius: 20px;
+        max-width: 460px;
+        min-height: 280px;
+        border-radius: 22px;
     }
     
     .gauge {
-        width: 160px;
-        height: 160px;
+        width: 180px !important;
+        height: 180px !important;
+        display: block !important;
+        visibility: visible !important;
     }
     
     .gauge-center {
-        width: 26px;
-        height: 26px;
+        width: 28px !important;
+        height: 28px !important;
     }
     
     .gauge-needle {
-        height: 42%;
-        width: 2.5px;
+        height: 43% !important;
+        width: 2.8px !important;
     }
     
     .gauge-value {
-        font-size: 1.9rem;
-        bottom: 12px;
+        font-size: 2.2rem !important;
+        bottom: 16px;
     }
     
     .gauge-label {
-        font-size: 0.85rem;
-        bottom: -28px;
+        font-size: 0.95rem !important;
+        bottom: -32px;
     }
     
     .gauge-number {
-        font-size: 0.65rem;
-        top: 18px;
-        transform-origin: center 75px; /* Adjusted for 160px gauge */
+        font-size: 0.7rem !important;
+        top: 20px;
+        transform-origin: center 85px; /* Adjusted for 180px gauge */
     }
     
     .gauge-tick {
-        height: 10px;
-        top: 5px;
-        transform-origin: center 75px; /* Adjusted for 160px gauge */
+        height: 12px !important;
+        top: 6px;
+        transform-origin: center 85px; /* Adjusted for 180px gauge */
     }
     
     .gauge-tick.major {
-        height: 14px;
+        height: 16px !important;
     }
     
     /* Brand adjustments for very small screens */
