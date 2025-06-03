@@ -26,9 +26,9 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
-// Camera positioning for driving/highway view
-camera.position.set(0, 5, 40);
-camera.lookAt(0, 0, -10);
+// Camera positioning for beach view
+camera.position.set(0, 15, 50);
+camera.lookAt(0, 0, 0);
 
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -58,25 +58,28 @@ const rimLight = new THREE.DirectionalLight(0xff69b4, 0.5);
 rimLight.position.set(-50, 50, -50);
 scene.add(rimLight);
 
-// Create Water
-const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+// Create Water with enhanced quality
+const waterGeometry = new THREE.PlaneGeometry(10000, 10000, 512, 512);
 const water = new Water(waterGeometry, {
-    textureWidth: 512,
-    textureHeight: 512,
+    textureWidth: 1024,
+    textureHeight: 1024,
     waterNormals: new THREE.TextureLoader().load(
         'https://threejs.org/examples/textures/waternormals.jpg',
         function (texture) {
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(4, 4);
         }
     ),
     sunDirection: new THREE.Vector3(),
-    sunColor: 0xffd700,
-    waterColor: 0x006994,
-    distortionScale: 3.7,
-    fog: scene.fog !== undefined
+    sunColor: 0xffffff,
+    waterColor: 0x001e2f,
+    distortionScale: 2.0,
+    fog: scene.fog !== undefined,
+    alpha: 0.95
 });
 water.rotation.x = -Math.PI / 2;
 water.position.y = -2;
+water.material.uniforms['size'].value = 10.0;
 scene.add(water);
 
 // Create Sky
@@ -98,21 +101,61 @@ sun.setFromSphericalCoords(1, phi, theta);
 skyUniforms['sunPosition'].value.copy(sun);
 water.material.uniforms['sunDirection'].value.copy(sun).normalize();
 
-// Beach sand with realistic texture
-const sandTexture = new THREE.TextureLoader().load('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+// Beach sand with realistic texture - create procedural sand texture
+const canvas = document.createElement('canvas');
+canvas.width = 512;
+canvas.height = 512;
+const ctx = canvas.getContext('2d');
+
+// Create grainy sand texture
+const imageData = ctx.createImageData(512, 512);
+const data = imageData.data;
+
+for (let i = 0; i < data.length; i += 4) {
+    const noise = Math.random();
+    const value = 230 + noise * 25;
+    data[i] = value;     // R
+    data[i + 1] = value - 10; // G
+    data[i + 2] = value - 30; // B
+    data[i + 3] = 255;   // A
+}
+
+ctx.putImageData(imageData, 0, 0);
+const sandTexture = new THREE.CanvasTexture(canvas);
 sandTexture.wrapS = sandTexture.wrapT = THREE.RepeatWrapping;
-sandTexture.repeat.set(50, 50);
+sandTexture.repeat.set(100, 100);
+
+// Create normal map for sand
+const normalCanvas = document.createElement('canvas');
+normalCanvas.width = 256;
+normalCanvas.height = 256;
+const normalCtx = normalCanvas.getContext('2d');
+const normalImageData = normalCtx.createImageData(256, 256);
+const normalData = normalImageData.data;
+
+for (let i = 0; i < normalData.length; i += 4) {
+    normalData[i] = 128 + Math.random() * 50 - 25;     // R
+    normalData[i + 1] = 128 + Math.random() * 50 - 25; // G
+    normalData[i + 2] = 255;                            // B
+    normalData[i + 3] = 255;                            // A
+}
+
+normalCtx.putImageData(normalImageData, 0, 0);
+const sandNormalMap = new THREE.CanvasTexture(normalCanvas);
+sandNormalMap.wrapS = sandNormalMap.wrapT = THREE.RepeatWrapping;
+sandNormalMap.repeat.set(50, 50);
 
 // Create sand dunes with displacement
-const sandGeometry = new THREE.PlaneGeometry(300, 150, 128, 128);
+const sandGeometry = new THREE.PlaneGeometry(300, 150, 256, 256);
 const sandMaterial = new THREE.MeshStandardMaterial({
     color: 0xf4e4c1,
-    roughness: 0.9,
-    metalness: 0.05,
+    roughness: 0.95,
+    metalness: 0.0,
     map: sandTexture,
-    displacementScale: 3,
-    bumpScale: 0.5,
-    normalScale: new THREE.Vector2(0.5, 0.5)
+    normalMap: sandNormalMap,
+    normalScale: new THREE.Vector2(0.3, 0.3),
+    displacementScale: 4,
+    bumpScale: 0.3
 });
 
 // Create height variations for dunes
@@ -163,77 +206,6 @@ farSand.position.z = 80;
 farSand.receiveShadow = true;
 scene.add(farSand);
 
-// Create coastal highway
-const roadGeometry = new THREE.PlaneGeometry(15, 300, 1, 1);
-const roadMaterial = new THREE.MeshStandardMaterial({
-    color: 0x333333,
-    roughness: 0.8,
-    metalness: 0.1
-});
-const road = new THREE.Mesh(roadGeometry, roadMaterial);
-road.rotation.x = -Math.PI / 2;
-road.position.set(5, -0.5, 0);
-road.receiveShadow = true;
-scene.add(road);
-
-// Road markings
-const markingGeometry = new THREE.PlaneGeometry(0.5, 10, 1, 1);
-const markingMaterial = new THREE.MeshStandardMaterial({
-    color: 0xFFFFFF,
-    roughness: 0.6
-});
-
-for (let i = -150; i < 150; i += 20) {
-    const marking = new THREE.Mesh(markingGeometry, markingMaterial);
-    marking.rotation.x = -Math.PI / 2;
-    marking.position.set(5, -0.4, i);
-    scene.add(marking);
-}
-
-// Luxury car placeholder (simplified)
-const carGroup = new THREE.Group();
-
-// Car body
-const carBodyGeometry = new THREE.BoxGeometry(4, 1.5, 8);
-const carBodyMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xff1493,
-    metalness: 0.9,
-    roughness: 0.1,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.0,
-    reflectivity: 1
-});
-const carBody = new THREE.Mesh(carBodyGeometry, carBodyMaterial);
-carBody.position.y = 1;
-carBody.castShadow = true;
-carGroup.add(carBody);
-
-// Car wheels
-const wheelGeometry = new THREE.CylinderGeometry(0.7, 0.7, 0.5, 32);
-const wheelMaterial = new THREE.MeshStandardMaterial({
-    color: 0x333333,
-    metalness: 0.8,
-    roughness: 0.3
-});
-
-const wheelPositions = [
-    [-1.5, 0.5, 2.5],
-    [1.5, 0.5, 2.5],
-    [-1.5, 0.5, -2.5],
-    [1.5, 0.5, -2.5]
-];
-
-wheelPositions.forEach(pos => {
-    const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
-    wheel.rotation.z = Math.PI / 2;
-    wheel.position.set(...pos);
-    wheel.castShadow = true;
-    carGroup.add(wheel);
-});
-
-carGroup.position.set(5, 0, 35);
-carGroup.rotation.y = -Math.PI / 12;
-scene.add(carGroup);
 
 // Palm trees
 function createPalmTree(x, z) {
@@ -432,19 +404,57 @@ function createDriftwood(x, z) {
 }
 
 // Add shells and driftwood
-for (let i = 0; i < 15; i++) {
+for (let i = 0; i < 25; i++) {
     scene.add(createSeashell(
+        (Math.random() - 0.5) * 80,
+        15 + Math.random() * 40
+    ));
+}
+
+for (let i = 0; i < 8; i++) {
+    scene.add(createDriftwood(
         (Math.random() - 0.5) * 60,
         20 + Math.random() * 30
     ));
 }
 
-for (let i = 0; i < 5; i++) {
-    scene.add(createDriftwood(
-        (Math.random() - 0.5) * 40,
-        25 + Math.random() * 20
-    ));
+// Add sand ripples
+const rippleGroup = new THREE.Group();
+for (let i = 0; i < 50; i++) {
+    const rippleGeometry = new THREE.PlaneGeometry(
+        2 + Math.random() * 3,
+        0.2,
+        32,
+        2
+    );
+    
+    // Create wave pattern
+    const rippleVertices = rippleGeometry.attributes.position.array;
+    for (let j = 0; j < rippleVertices.length; j += 3) {
+        const x = rippleVertices[j];
+        rippleVertices[j + 2] = Math.sin(x * 2) * 0.05;
+    }
+    rippleGeometry.computeVertexNormals();
+    
+    const rippleMaterial = new THREE.MeshStandardMaterial({
+        color: 0xe8d4b0,
+        roughness: 0.9,
+        metalness: 0
+    });
+    
+    const ripple = new THREE.Mesh(rippleGeometry, rippleMaterial);
+    ripple.rotation.x = -Math.PI / 2;
+    ripple.rotation.z = Math.random() * Math.PI;
+    ripple.position.set(
+        (Math.random() - 0.5) * 100,
+        -1.4 + Math.random() * 0.1,
+        (Math.random() - 0.5) * 60 + 20
+    );
+    ripple.castShadow = true;
+    ripple.receiveShadow = true;
+    rippleGroup.add(ripple);
 }
+scene.add(rippleGroup);
 
 // Enhanced shoreline with breaking waves
 const shorelineGroup = new THREE.Group();
@@ -992,16 +1002,6 @@ function animate() {
         }
     });
     
-    // Subtle car animation with driving motion
-    carGroup.position.y = Math.sin(Date.now() * 0.001) * 0.1;
-    
-    // Animate road markings to simulate driving
-    scene.traverse((child) => {
-        if (child.material && child.material.color && child.material.color.r === 1 && child.geometry && child.geometry.type === 'PlaneGeometry' && child.position.y === -0.4) {
-            child.position.z += 0.5;
-            if (child.position.z > 150) child.position.z = -150;
-        }
-    });
     
     // Animate beach grass
     scene.traverse((child) => {
@@ -1041,6 +1041,14 @@ function animate() {
     
     // Animate tropical island
     if (tropicalIsland && tropicalIsland.userData) {
+        // Animate foam ring around island
+        const foamRing = tropicalIsland.children.find(child => 
+            child.geometry && child.geometry.type === 'RingGeometry'
+        );
+        if (foamRing) {
+            foamRing.material.opacity = 0.6 + Math.sin(Date.now() * 0.001) * 0.2;
+            foamRing.rotation.z += 0.0005;
+        }
         // Animate birds circling island
         if (tropicalIsland.userData.birds) {
             tropicalIsland.userData.birds.children.forEach(bird => {
@@ -1256,6 +1264,34 @@ function createTropicalIsland() {
     }
     
     islandGroup.add(vegetation);
+    
+    // Add foam ring around island
+    const foamRingGeometry = new THREE.RingGeometry(28, 35, 64);
+    const foamRingMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.7,
+        roughness: 0.1,
+        metalness: 0,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.1
+    });
+    
+    // Create foam vertices variation
+    const foamVertices = foamRingGeometry.attributes.position.array;
+    for (let i = 0; i < foamVertices.length; i += 3) {
+        const x = foamVertices[i];
+        const y = foamVertices[i + 1];
+        const distance = Math.sqrt(x * x + y * y);
+        const wave = Math.sin(distance * 0.5) * 0.3;
+        foamVertices[i + 2] = wave;
+    }
+    foamRingGeometry.computeVertexNormals();
+    
+    const foamRing = new THREE.Mesh(foamRingGeometry, foamRingMaterial);
+    foamRing.rotation.x = -Math.PI / 2;
+    foamRing.position.y = -1.8;
+    islandGroup.add(foamRing);
     
     // Create mermaid sunbathing on a rock
     const mermaidGroup = new THREE.Group();
