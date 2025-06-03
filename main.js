@@ -110,7 +110,8 @@ const sandMaterial = new THREE.MeshStandardMaterial({
     metalness: 0.05,
     map: sandTexture,
     displacementScale: 3,
-    bumpScale: 0.5
+    bumpScale: 0.5,
+    normalScale: new THREE.Vector2(0.5, 0.5)
 });
 
 // Create height variations for dunes
@@ -774,12 +775,52 @@ function createGaugeElement(label, value, maxValue = 100) {
         <div class="gauge-label">${label}</div>
     `;
     
+    // Add hover interaction for needle spin
+    let isHovering = false;
+    let currentNeedleValue = value;
+    
+    gaugeDiv.addEventListener('mouseenter', () => {
+        isHovering = true;
+        const needle = gaugeDiv.querySelector('.gauge-needle');
+        
+        // Get current value from parent element or use initial
+        const parentGauge = gaugeDiv.closest('.gauge');
+        if (parentGauge && parentGauge.dataset.currentValue) {
+            currentNeedleValue = parseInt(parentGauge.dataset.currentValue);
+        }
+        
+        // Quick spin animation on hover
+        gsap.to(needle, {
+            rotation: "+=360",
+            duration: 0.8,
+            ease: "power2.inOut",
+            onComplete: function() {
+                // Return to current value
+                gsap.set(needle, {
+                    rotation: currentNeedleValue * 1.8 - 90
+                });
+            }
+        });
+    });
+    
+    gaugeDiv.addEventListener('mouseleave', () => {
+        isHovering = false;
+    });
+    
     // Add click interaction
     gaugeDiv.addEventListener('click', () => {
         const needle = gaugeDiv.querySelector('.gauge-needle');
         const valueDisplay = gaugeDiv.querySelector('.gauge-value');
         const newValue = Math.floor(Math.random() * 100);
         const newRotation = (newValue * 1.8) - 90;
+        
+        currentNeedleValue = newValue;
+        
+        // Update stored value
+        const parentGauge = gaugeDiv.closest('.gauge');
+        if (parentGauge) {
+            parentGauge.dataset.currentValue = newValue;
+        }
         
         gsap.to(needle, {
             rotation: newRotation,
@@ -818,22 +859,40 @@ gauges.forEach((gauge, index) => {
     const gaugeElement = createGaugeElement(gauge.label, gauge.value);
     gaugeContainer.appendChild(gaugeElement);
     
-    // Set initial needle position with staggered animation
-    setTimeout(() => {
-        const needle = gaugeElement.querySelector('.gauge-needle');
-        const valueDisplay = gaugeElement.querySelector('.gauge-value');
-        gsap.to(needle, {
-            rotation: gauge.value * 1.8 - 90,
-            duration: 2,
-            ease: "elastic.out(1, 0.5)",
-            delay: index * 0.2,
-            onUpdate: function() {
-                const currentRotation = gsap.getProperty(needle, "rotation");
-                const currentValue = Math.round((currentRotation + 90) / 1.8);
-                valueDisplay.textContent = `${currentValue}%`;
+    // Store initial value on the element
+    gaugeElement.dataset.currentValue = gauge.value;
+    
+    // Needle spin animation on load
+    const needle = gaugeElement.querySelector('.gauge-needle');
+    const valueDisplay = gaugeElement.querySelector('.gauge-value');
+    
+    // Initial spin animation
+    gsap.fromTo(needle, 
+        {
+            rotation: -90
+        },
+        {
+            rotation: 270,
+            duration: 1.5,
+            ease: "power2.inOut",
+            delay: index * 0.1,
+            onComplete: function() {
+                // Then animate to actual value
+                gsap.to(needle, {
+                    rotation: gauge.value * 1.8 - 90,
+                    duration: 1.5,
+                    ease: "elastic.out(1, 0.5)",
+                    onUpdate: function() {
+                        const currentRotation = gsap.getProperty(needle, "rotation");
+                        const currentValue = Math.round((currentRotation + 90) / 1.8);
+                        if (currentValue >= 0 && currentValue <= 100) {
+                            valueDisplay.textContent = `${currentValue}%`;
+                        }
+                    }
+                });
             }
-        });
-    }, 500);
+        }
+    );
 });
 
 // Sparkle effect
@@ -938,6 +997,42 @@ function animate() {
         if (crab.position.z < 15 || crab.position.z > 45) crab.userData.direction += Math.PI;
     });
     
+    // Animate tropical island
+    if (tropicalIsland && tropicalIsland.userData) {
+        // Animate birds circling island
+        if (tropicalIsland.userData.birds) {
+            tropicalIsland.userData.birds.children.forEach(bird => {
+                bird.userData.angle += bird.userData.speed;
+                bird.position.x = Math.cos(bird.userData.angle) * bird.userData.radius;
+                bird.position.z = Math.sin(bird.userData.angle) * bird.userData.radius;
+                bird.position.y = bird.userData.height + Math.sin(Date.now() * 0.001 + bird.userData.angle) * 2;
+                bird.rotation.y = bird.userData.angle + Math.PI / 2;
+                
+                // Animate wings
+                bird.children.forEach((wing, index) => {
+                    if (index > 0) {
+                        wing.rotation.z = (index === 1 ? -1 : 1) * (Math.sin(Date.now() * 0.01) * 0.5 + 0.3);
+                    }
+                });
+            });
+        }
+        
+        // Subtle mermaid animation
+        if (tropicalIsland.userData.mermaid) {
+            // Hair flowing
+            const hair = tropicalIsland.userData.mermaid.children.find(child => child.position.y === 3.5 && child.position.z === -0.7);
+            if (hair) {
+                hair.rotation.y = Math.sin(Date.now() * 0.0005) * 0.1;
+            }
+            
+            // Tail movement
+            const tail = tropicalIsland.userData.mermaid.children.find(child => child.geometry && child.geometry.type === 'TubeGeometry');
+            if (tail) {
+                tail.rotation.y = Math.sin(Date.now() * 0.0008) * 0.05;
+            }
+        }
+    }
+    
     // Animate fish
     fishes.forEach(fish => {
         const now = Date.now();
@@ -980,6 +1075,309 @@ window.addEventListener('resize', () => {
 
 // Start animation
 animate();
+
+// Create tropical island with enhanced details
+function createTropicalIsland() {
+    const islandGroup = new THREE.Group();
+    
+    // Main island base with multiple layers
+    const islandGeometry = new THREE.ConeGeometry(25, 8, 32, 8);
+    const islandVertices = islandGeometry.attributes.position.array;
+    
+    // Create more realistic island shape
+    for (let i = 0; i < islandVertices.length; i += 3) {
+        const x = islandVertices[i];
+        const y = islandVertices[i + 1];
+        const z = islandVertices[i + 2];
+        
+        // Add organic variations
+        const noise = Math.sin(x * 0.3) * Math.cos(z * 0.3) * 1.5;
+        const detail = Math.sin(x * 2) * Math.cos(z * 2) * 0.3;
+        islandVertices[i] += noise + detail;
+        islandVertices[i + 2] += noise * 0.8 + detail;
+        
+        // Create beach slope at water level
+        if (y < -2) {
+            const dist = Math.sqrt(x * x + z * z);
+            islandVertices[i] *= 1 + (y + 2) * 0.1;
+            islandVertices[i + 2] *= 1 + (y + 2) * 0.1;
+        }
+    }
+    islandGeometry.computeVertexNormals();
+    
+    // Multiple material layers for realism
+    const rockMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8B7355,
+        roughness: 0.9,
+        metalness: 0.1,
+        normalScale: new THREE.Vector2(1, 1)
+    });
+    
+    const island = new THREE.Mesh(islandGeometry, rockMaterial);
+    island.position.y = -6;
+    island.rotation.y = Math.random() * Math.PI;
+    island.castShadow = true;
+    island.receiveShadow = true;
+    islandGroup.add(island);
+    
+    // Sandy beach around island
+    const beachGeometry = new THREE.RingGeometry(20, 30, 32);
+    const beachMaterial = new THREE.MeshStandardMaterial({
+        color: 0xf4e4c1,
+        roughness: 0.95,
+        metalness: 0
+    });
+    const beach = new THREE.Mesh(beachGeometry, beachMaterial);
+    beach.rotation.x = -Math.PI / 2;
+    beach.position.y = -1.8;
+    beach.receiveShadow = true;
+    islandGroup.add(beach);
+    
+    // Add tropical vegetation
+    const vegetation = new THREE.Group();
+    
+    // Create lush palm trees on island
+    for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2;
+        const radius = 8 + Math.random() * 5;
+        const palm = createPalmTree(
+            Math.cos(angle) * radius,
+            Math.sin(angle) * radius
+        );
+        palm.scale.setScalar(0.8 + Math.random() * 0.4);
+        palm.position.y = 2 + Math.random() * 2;
+        vegetation.add(palm);
+    }
+    
+    // Add tropical flowers
+    for (let i = 0; i < 20; i++) {
+        const flowerGroup = new THREE.Group();
+        
+        // Flower petals
+        const petalGeometry = new THREE.SphereGeometry(0.3, 8, 4);
+        const petalMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color().setHSL(Math.random() * 0.1 + 0.85, 1, 0.6),
+            roughness: 0.3,
+            metalness: 0
+        });
+        
+        for (let j = 0; j < 5; j++) {
+            const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+            const petalAngle = (j / 5) * Math.PI * 2;
+            petal.position.x = Math.cos(petalAngle) * 0.3;
+            petal.position.z = Math.sin(petalAngle) * 0.3;
+            petal.scale.y = 1.5;
+            flowerGroup.add(petal);
+        }
+        
+        // Flower center
+        const centerGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+        const centerMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFFD700,
+            roughness: 0.6
+        });
+        const center = new THREE.Mesh(centerGeometry, centerMaterial);
+        flowerGroup.add(center);
+        
+        // Position flowers randomly on island
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 12;
+        flowerGroup.position.set(
+            Math.cos(angle) * radius,
+            3 + Math.random() * 2,
+            Math.sin(angle) * radius
+        );
+        flowerGroup.scale.setScalar(0.5 + Math.random() * 0.5);
+        vegetation.add(flowerGroup);
+    }
+    
+    // Add rocks and pebbles
+    for (let i = 0; i < 30; i++) {
+        const rockGeometry = new THREE.DodecahedronGeometry(0.3 + Math.random() * 0.5, 0);
+        const rockMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0.3 + Math.random() * 0.2, 0.3 + Math.random() * 0.2, 0.3),
+            roughness: 0.9,
+            metalness: 0
+        });
+        const rock = new THREE.Mesh(rockGeometry, rockMaterial);
+        
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 20;
+        rock.position.set(
+            Math.cos(angle) * radius,
+            -1.5 + Math.random() * 4,
+            Math.sin(angle) * radius
+        );
+        rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        rock.castShadow = true;
+        islandGroup.add(rock);
+    }
+    
+    islandGroup.add(vegetation);
+    
+    // Create mermaid sunbathing on a rock
+    const mermaidGroup = new THREE.Group();
+    
+    // Sunbathing rock
+    const rockPlatformGeometry = new THREE.BoxGeometry(6, 1, 3);
+    const rockPlatformMaterial = new THREE.MeshStandardMaterial({
+        color: 0x696969,
+        roughness: 0.8,
+        metalness: 0.1
+    });
+    const rockPlatform = new THREE.Mesh(rockPlatformGeometry, rockPlatformMaterial);
+    rockPlatform.position.set(0, 1, 0);
+    rockPlatform.rotation.x = -0.1;
+    rockPlatform.castShadow = true;
+    rockPlatform.receiveShadow = true;
+    mermaidGroup.add(rockPlatform);
+    
+    // Mermaid body (simplified but recognizable)
+    // Upper body
+    const torsoGeometry = new THREE.CapsuleGeometry(0.8, 2, 8, 16);
+    const skinMaterial = new THREE.MeshStandardMaterial({
+        color: 0xFFDBD7,
+        roughness: 0.6,
+        metalness: 0
+    });
+    const torso = new THREE.Mesh(torsoGeometry, skinMaterial);
+    torso.position.set(0, 2.5, 0);
+    torso.rotation.x = -Math.PI / 2 + 0.3;
+    mermaidGroup.add(torso);
+    
+    // Mermaid tail
+    const tailCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 1.5, 0),
+        new THREE.Vector3(0, 1, 1),
+        new THREE.Vector3(0, 0.5, 2),
+        new THREE.Vector3(0, 0.3, 3)
+    ]);
+    
+    const tailGeometry = new THREE.TubeGeometry(tailCurve, 20, 0.6, 8, false);
+    const tailMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x20B2AA,
+        metalness: 0.8,
+        roughness: 0.2,
+        clearcoat: 1,
+        clearcoatRoughness: 0,
+        reflectivity: 1
+    });
+    const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+    mermaidGroup.add(tail);
+    
+    // Tail fin
+    const finGeometry = new THREE.ConeGeometry(1.5, 2, 8);
+    finGeometry.scale(1, 0.3, 1);
+    const fin = new THREE.Mesh(finGeometry, tailMaterial);
+    fin.position.set(0, 0.3, 4);
+    fin.rotation.x = Math.PI / 2;
+    mermaidGroup.add(fin);
+    
+    // Head
+    const headGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+    const head = new THREE.Mesh(headGeometry, skinMaterial);
+    head.position.set(0, 3.5, -0.8);
+    mermaidGroup.add(head);
+    
+    // Hair
+    const hairGeometry = new THREE.SphereGeometry(0.6, 16, 16);
+    hairGeometry.scale(1, 1.2, 1);
+    const hairMaterial = new THREE.MeshStandardMaterial({
+        color: 0xFFB6C1,
+        roughness: 0.8,
+        metalness: 0.1
+    });
+    const hair = new THREE.Mesh(hairGeometry, hairMaterial);
+    hair.position.set(0, 3.5, -0.7);
+    mermaidGroup.add(hair);
+    
+    // Arms (simplified)
+    const armGeometry = new THREE.CapsuleGeometry(0.2, 1.5, 4, 8);
+    const leftArm = new THREE.Mesh(armGeometry, skinMaterial);
+    leftArm.position.set(-1, 2.8, -0.3);
+    leftArm.rotation.z = 0.5;
+    mermaidGroup.add(leftArm);
+    
+    const rightArm = new THREE.Mesh(armGeometry, skinMaterial);
+    rightArm.position.set(1, 2.8, -0.3);
+    rightArm.rotation.z = -0.5;
+    mermaidGroup.add(rightArm);
+    
+    // Add seashell bra
+    const shellGeometry = new THREE.SphereGeometry(0.3, 8, 4);
+    shellGeometry.scale(1, 0.7, 0.7);
+    const shellMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0xFFF0F5,
+        metalness: 0.3,
+        roughness: 0.3,
+        clearcoat: 0.5
+    });
+    
+    const leftShell = new THREE.Mesh(shellGeometry, shellMaterial);
+    leftShell.position.set(-0.3, 2.8, -0.5);
+    leftShell.rotation.z = 0.3;
+    mermaidGroup.add(leftShell);
+    
+    const rightShell = new THREE.Mesh(shellGeometry, shellMaterial);
+    rightShell.position.set(0.3, 2.8, -0.5);
+    rightShell.rotation.z = -0.3;
+    mermaidGroup.add(rightShell);
+    
+    // Position mermaid on island
+    mermaidGroup.position.set(8, 0, -5);
+    mermaidGroup.rotation.y = -Math.PI / 4;
+    mermaidGroup.scale.setScalar(1.2);
+    
+    islandGroup.add(mermaidGroup);
+    
+    // Add island ambient details
+    // Birds circling
+    const birdGroup = new THREE.Group();
+    for (let i = 0; i < 3; i++) {
+        const birdGeometry = new THREE.ConeGeometry(0.2, 1, 4);
+        const birdMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFFFFFF,
+            roughness: 0.8
+        });
+        const bird = new THREE.Mesh(birdGeometry, birdMaterial);
+        bird.rotation.x = Math.PI / 2;
+        
+        // Wing geometry
+        const wingGeometry = new THREE.PlaneGeometry(0.8, 0.3);
+        const leftWing = new THREE.Mesh(wingGeometry, birdMaterial);
+        leftWing.position.x = -0.4;
+        leftWing.rotation.z = -0.3;
+        bird.add(leftWing);
+        
+        const rightWing = new THREE.Mesh(wingGeometry, birdMaterial);
+        rightWing.position.x = 0.4;
+        rightWing.rotation.z = 0.3;
+        bird.add(rightWing);
+        
+        bird.userData = {
+            angle: (i / 3) * Math.PI * 2,
+            radius: 30 + i * 5,
+            height: 15 + i * 3,
+            speed: 0.0005 + Math.random() * 0.0005
+        };
+        
+        birdGroup.add(bird);
+    }
+    islandGroup.add(birdGroup);
+    
+    // Animated elements
+    islandGroup.userData = {
+        birds: birdGroup,
+        mermaid: mermaidGroup
+    };
+    
+    return islandGroup;
+}
+
+// Add tropical island to scene
+const tropicalIsland = createTropicalIsland();
+tropicalIsland.position.set(-30, 0, -20);
+scene.add(tropicalIsland);
 
 // Add diamond particles to UI
 function createDiamondParticles() {
@@ -1058,6 +1456,145 @@ function updateDashboardData() {
 
 // Initialize real-time updates
 setTimeout(updateDashboardData, 2000);
+
+// Make gauge container draggable
+function makeElementDraggable(element) {
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    function dragStart(e) {
+        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+        
+        if (e.target === element || element.contains(e.target)) {
+            isDragging = true;
+            
+            initialX = clientX - xOffset;
+            initialY = clientY - yOffset;
+            
+            element.style.cursor = 'grabbing';
+        }
+    }
+
+    function dragEnd(e) {
+        initialX = currentX;
+        initialY = currentY;
+        isDragging = false;
+        element.style.cursor = 'move';
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            
+            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            
+            currentX = clientX - initialX;
+            currentY = clientY - initialY;
+
+            xOffset = currentX;
+            yOffset = currentY;
+
+            element.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        }
+    }
+
+    // Mouse events
+    element.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+    
+    // Touch events
+    element.addEventListener('touchstart', dragStart);
+    document.addEventListener('touchmove', drag);
+    document.addEventListener('touchend', dragEnd);
+}
+
+// Make gauge container (leather pad) draggable
+const gaugeContainer = document.getElementById('gaugeContainer');
+makeElementDraggable(gaugeContainer);
+
+// Make individual gauges draggable
+function makeGaugesDraggable() {
+    const gauges = document.querySelectorAll('.gauge');
+    
+    gauges.forEach(gauge => {
+        gauge.style.position = 'relative';
+        gauge.style.cursor = 'move';
+        
+        let isDragging = false;
+        let currentX = 0;
+        let currentY = 0;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+        
+        function dragStart(e) {
+            // Don't start drag if clicking on interactive elements
+            if (e.target.classList.contains('gauge-needle') || 
+                e.target.classList.contains('gauge-value') ||
+                e.target.classList.contains('gauge-center')) {
+                return;
+            }
+            
+            e.stopPropagation();
+            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            
+            isDragging = true;
+            initialX = clientX - xOffset;
+            initialY = clientY - yOffset;
+            
+            gauge.style.cursor = 'grabbing';
+            gauge.style.zIndex = '1000';
+        }
+        
+        function dragEnd(e) {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+            gauge.style.cursor = 'move';
+            gauge.style.zIndex = '';
+        }
+        
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+                
+                currentX = clientX - initialX;
+                currentY = clientY - initialY;
+                
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                gauge.style.transform = `translate(${currentX}px, ${currentY}px) scale(1)`;
+            }
+        }
+        
+        gauge.addEventListener('mousedown', dragStart);
+        gauge.addEventListener('touchstart', dragStart);
+        
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+        
+        document.addEventListener('mouseup', dragEnd);
+        document.addEventListener('touchend', dragEnd);
+    });
+}
+
+// Initialize gauge dragging
+setTimeout(makeGaugesDraggable, 1000);
 
 // Theme switching functionality
 document.querySelectorAll('.theme-option').forEach(option => {

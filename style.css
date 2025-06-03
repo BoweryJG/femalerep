@@ -75,12 +75,13 @@ body {
 
 .gauge-container {
     position: absolute;
-    bottom: 80px;
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     gap: 40px;
     padding: 40px;
+    cursor: move;
     background: 
         linear-gradient(135deg, 
             rgba(92, 51, 23, 0.95) 0%, 
