@@ -1806,16 +1806,16 @@ body[data-theme="gold"] {
     .gauge-container {
         /* Position pad at top center of screen */
         position: fixed;
-        top: 120px; /* Below brand mark */
+        top: 100px; /* Below brand mark */
         left: 50%;
         transform: translateX(-50%);
         
-        /* Compact sizing for 2 gauges */
-        gap: 20px;
-        padding: 25px 20px;
-        width: 90vw;
-        max-width: 400px;
-        border-radius: 20px;
+        /* Larger sizing optimized for 2 gauges on mobile */
+        gap: 30px;
+        padding: 35px 25px;
+        width: 95vw;
+        max-width: 500px;
+        border-radius: 25px;
         
         /* Ensure proper flex layout */
         display: flex;
@@ -1825,51 +1825,51 @@ body[data-theme="gold"] {
     }
     
     .gauge {
-        width: 140px;
-        height: 140px;
+        width: 180px;
+        height: 180px;
         flex-shrink: 0;
     }
     
-    /* Show only 2 gauges on mobile */
-    .gauge:nth-child(n+3) {
-        display: none;
+    /* Show only 2 gauges on mobile - more specific selector */
+    .gauge:nth-of-type(n+3) {
+        display: none !important;
     }
     
     .gauge-label {
-        font-size: 0.8rem;
-        bottom: -25px;
-        letter-spacing: 0.08em;
+        font-size: 0.9rem;
+        bottom: -30px;
+        letter-spacing: 0.1em;
     }
     
     .gauge-value {
-        font-size: 1.7rem;
-        bottom: 10px;
+        font-size: 2.1rem;
+        bottom: 15px;
     }
     
     .gauge-number {
-        font-size: 0.6rem;
-        top: 16px;
-        transform-origin: center 65px; /* Adjusted for smaller gauge */
+        font-size: 0.7rem;
+        top: 20px;
+        transform-origin: center 85px; /* Adjusted for 180px gauge */
     }
     
     .gauge-needle {
-        height: 40%;
-        width: 2.5px;
+        height: 43%;
+        width: 3px;
     }
     
     .gauge-center {
-        width: 22px;
-        height: 22px;
+        width: 28px;
+        height: 28px;
     }
     
     .gauge-tick {
-        height: 8px;
-        top: 4px;
-        transform-origin: center 65px; /* Adjusted for smaller gauge */
+        height: 12px;
+        top: 6px;
+        transform-origin: center 85px; /* Adjusted for 180px gauge */
     }
     
     .gauge-tick.major {
-        height: 12px;
+        height: 16px;
     }
     
     /* Brand mark - compact at very top */
@@ -2103,57 +2103,57 @@ body[data-theme="gold"] {
     }
 }
 
-/* Small mobile devices - Compact but Luxurious */
+/* Small mobile devices - Still optimized for 2 gauges */
 @media (max-width: 480px) {
     .gauge-container {
-        /* Keep top positioning but make even more compact */
-        top: 100px;
-        padding: 18px 15px;
-        gap: 15px;
-        width: 95vw;
-        max-width: 320px;
-        border-radius: 18px;
+        /* Keep top positioning but optimize for smaller screens */
+        top: 90px;
+        padding: 30px 20px;
+        gap: 25px;
+        width: 98vw;
+        max-width: 420px;
+        border-radius: 20px;
     }
     
     .gauge {
-        width: 120px;
-        height: 120px;
+        width: 160px;
+        height: 160px;
     }
     
     .gauge-center {
-        width: 20px;
-        height: 20px;
+        width: 26px;
+        height: 26px;
     }
     
     .gauge-needle {
-        height: 38%;
-        width: 2px;
+        height: 42%;
+        width: 2.5px;
     }
     
     .gauge-value {
-        font-size: 1.4rem;
-        bottom: 8px;
+        font-size: 1.9rem;
+        bottom: 12px;
     }
     
     .gauge-label {
-        font-size: 0.75rem;
-        bottom: -22px;
+        font-size: 0.85rem;
+        bottom: -28px;
     }
     
     .gauge-number {
-        font-size: 0.55rem;
-        top: 14px;
-        transform-origin: center 55px; /* Adjusted for smaller gauge */
+        font-size: 0.65rem;
+        top: 18px;
+        transform-origin: center 75px; /* Adjusted for 160px gauge */
     }
     
     .gauge-tick {
-        height: 6px;
-        top: 3px;
-        transform-origin: center 55px; /* Adjusted for smaller gauge */
+        height: 10px;
+        top: 5px;
+        transform-origin: center 75px; /* Adjusted for 160px gauge */
     }
     
     .gauge-tick.major {
-        height: 10px;
+        height: 14px;
     }
     
     /* Brand adjustments for very small screens */
