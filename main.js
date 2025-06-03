@@ -26,9 +26,9 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
-// Camera positioning for beach view
-camera.position.set(0, 10, 30);
-camera.lookAt(0, 0, 0);
+// Camera positioning for driving/highway view
+camera.position.set(0, 5, 40);
+camera.lookAt(0, 0, -10);
 
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -163,6 +163,33 @@ farSand.position.z = 80;
 farSand.receiveShadow = true;
 scene.add(farSand);
 
+// Create coastal highway
+const roadGeometry = new THREE.PlaneGeometry(15, 300, 1, 1);
+const roadMaterial = new THREE.MeshStandardMaterial({
+    color: 0x333333,
+    roughness: 0.8,
+    metalness: 0.1
+});
+const road = new THREE.Mesh(roadGeometry, roadMaterial);
+road.rotation.x = -Math.PI / 2;
+road.position.set(5, -0.5, 0);
+road.receiveShadow = true;
+scene.add(road);
+
+// Road markings
+const markingGeometry = new THREE.PlaneGeometry(0.5, 10, 1, 1);
+const markingMaterial = new THREE.MeshStandardMaterial({
+    color: 0xFFFFFF,
+    roughness: 0.6
+});
+
+for (let i = -150; i < 150; i += 20) {
+    const marking = new THREE.Mesh(markingGeometry, markingMaterial);
+    marking.rotation.x = -Math.PI / 2;
+    marking.position.set(5, -0.4, i);
+    scene.add(marking);
+}
+
 // Luxury car placeholder (simplified)
 const carGroup = new THREE.Group();
 
@@ -204,8 +231,8 @@ wheelPositions.forEach(pos => {
     carGroup.add(wheel);
 });
 
-carGroup.position.set(0, 0, 25);
-carGroup.rotation.y = Math.PI / 6;
+carGroup.position.set(5, 0, 35);
+carGroup.rotation.y = -Math.PI / 12;
 scene.add(carGroup);
 
 // Palm trees
@@ -922,7 +949,8 @@ function createSparkle(element) {
 
 // Create tropical island before starting animations
 const tropicalIsland = createTropicalIsland();
-tropicalIsland.position.set(-30, 0, -20);
+tropicalIsland.position.set(-25, 0, -30);
+tropicalIsland.scale.setScalar(1.2);
 scene.add(tropicalIsland);
 
 // Animation loop
@@ -964,8 +992,16 @@ function animate() {
         }
     });
     
-    // Subtle car animation
+    // Subtle car animation with driving motion
     carGroup.position.y = Math.sin(Date.now() * 0.001) * 0.1;
+    
+    // Animate road markings to simulate driving
+    scene.traverse((child) => {
+        if (child.material && child.material.color && child.material.color.r === 1 && child.geometry && child.geometry.type === 'PlaneGeometry' && child.position.y === -0.4) {
+            child.position.z += 0.5;
+            if (child.position.z > 150) child.position.z = -150;
+        }
+    });
     
     // Animate beach grass
     scene.traverse((child) => {
