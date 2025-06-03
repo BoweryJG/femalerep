@@ -382,6 +382,151 @@ foam.rotation.x = -Math.PI / 2;
 foam.position.set(0, -1.4, 10);
 scene.add(foam);
 
+// Create crabs
+function createCrab() {
+    const crabGroup = new THREE.Group();
+    
+    // Crab body
+    const bodyGeometry = new THREE.SphereGeometry(0.3, 8, 6);
+    bodyGeometry.scale(1.2, 0.6, 1);
+    const bodyMaterial = new THREE.MeshStandardMaterial({
+        color: 0xff6347,
+        roughness: 0.7,
+        metalness: 0.1
+    });
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    body.castShadow = true;
+    crabGroup.add(body);
+    
+    // Crab claws
+    const clawGeometry = new THREE.SphereGeometry(0.15, 6, 4);
+    clawGeometry.scale(1.5, 1, 0.8);
+    
+    const leftClaw = new THREE.Mesh(clawGeometry, bodyMaterial);
+    leftClaw.position.set(-0.4, 0, 0.2);
+    leftClaw.rotation.z = -0.3;
+    crabGroup.add(leftClaw);
+    
+    const rightClaw = new THREE.Mesh(clawGeometry, bodyMaterial);
+    rightClaw.position.set(0.4, 0, 0.2);
+    rightClaw.rotation.z = 0.3;
+    crabGroup.add(rightClaw);
+    
+    // Crab legs
+    const legGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 4);
+    const legMaterial = new THREE.MeshStandardMaterial({
+        color: 0xff4500,
+        roughness: 0.8
+    });
+    
+    for (let i = 0; i < 3; i++) {
+        // Left legs
+        const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+        leftLeg.position.set(-0.3, -0.1, -0.1 + i * 0.1);
+        leftLeg.rotation.z = -Math.PI / 3;
+        crabGroup.add(leftLeg);
+        
+        // Right legs
+        const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+        rightLeg.position.set(0.3, -0.1, -0.1 + i * 0.1);
+        rightLeg.rotation.z = Math.PI / 3;
+        crabGroup.add(rightLeg);
+    }
+    
+    // Eyes
+    const eyeGeometry = new THREE.SphereGeometry(0.05, 4, 4);
+    const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+    
+    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    leftEye.position.set(-0.1, 0.15, 0.2);
+    crabGroup.add(leftEye);
+    
+    const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    rightEye.position.set(0.1, 0.15, 0.2);
+    crabGroup.add(rightEye);
+    
+    // Random initial position
+    crabGroup.position.set(
+        (Math.random() - 0.5) * 40,
+        -1.2,
+        20 + Math.random() * 20
+    );
+    crabGroup.scale.setScalar(0.5 + Math.random() * 0.3);
+    
+    // Store movement data
+    crabGroup.userData = {
+        speed: 0.02 + Math.random() * 0.03,
+        direction: Math.random() * Math.PI * 2,
+        changeDirectionTime: Date.now() + Math.random() * 5000
+    };
+    
+    return crabGroup;
+}
+
+// Add crabs to scene
+const crabs = [];
+for (let i = 0; i < 8; i++) {
+    const crab = createCrab();
+    crabs.push(crab);
+    scene.add(crab);
+}
+
+// Create fish
+function createFish() {
+    const fishGroup = new THREE.Group();
+    
+    // Fish body
+    const bodyGeometry = new THREE.SphereGeometry(0.4, 8, 6);
+    bodyGeometry.scale(1.5, 0.7, 0.5);
+    const bodyMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x4169e1,
+        metalness: 0.6,
+        roughness: 0.2,
+        clearcoat: 0.5,
+        clearcoatRoughness: 0.1
+    });
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    fishGroup.add(body);
+    
+    // Fish tail
+    const tailGeometry = new THREE.ConeGeometry(0.3, 0.6, 4);
+    const tail = new THREE.Mesh(tailGeometry, bodyMaterial);
+    tail.position.set(-0.8, 0, 0);
+    tail.rotation.z = -Math.PI / 2;
+    tail.scale.set(1, 1.5, 0.5);
+    fishGroup.add(tail);
+    
+    // Fish fin
+    const finGeometry = new THREE.ConeGeometry(0.2, 0.3, 3);
+    const topFin = new THREE.Mesh(finGeometry, bodyMaterial);
+    topFin.position.set(0, 0.3, 0);
+    topFin.scale.set(0.5, 1, 0.3);
+    fishGroup.add(topFin);
+    
+    // Store jump data
+    fishGroup.userData = {
+        jumpTime: Date.now() + Math.random() * 10000,
+        jumpDuration: 2000,
+        startPos: new THREE.Vector3(
+            (Math.random() - 0.5) * 60,
+            -3,
+            -10 + Math.random() * 20
+        )
+    };
+    
+    fishGroup.position.copy(fishGroup.userData.startPos);
+    
+    return fishGroup;
+}
+
+// Add fish to scene
+const fishes = [];
+for (let i = 0; i < 5; i++) {
+    const fish = createFish();
+    fishes.push(fish);
+    scene.add(fish);
+}
+
 // Diamond particles - removed for cleaner look
 
 // Create luxury gauges
@@ -630,6 +775,64 @@ function animate() {
     scene.traverse((child) => {
         if (child.material && child.material.color && child.material.color.r === 0.486) { // grass color check
             child.rotation.z = child.userData.originalRotation + Math.sin(Date.now() * 0.001) * 0.1;
+        }
+    });
+    
+    // Animate crabs
+    crabs.forEach(crab => {
+        const now = Date.now();
+        
+        // Change direction occasionally
+        if (now > crab.userData.changeDirectionTime) {
+            crab.userData.direction += (Math.random() - 0.5) * Math.PI;
+            crab.userData.changeDirectionTime = now + 3000 + Math.random() * 5000;
+        }
+        
+        // Sideways scuttling movement
+        const dx = Math.cos(crab.userData.direction) * crab.userData.speed;
+        const dz = Math.sin(crab.userData.direction) * crab.userData.speed;
+        
+        crab.position.x += dx;
+        crab.position.z += dz;
+        
+        // Face movement direction
+        crab.rotation.y = crab.userData.direction + Math.PI / 2;
+        
+        // Add scuttling animation
+        crab.position.y = -1.2 + Math.abs(Math.sin(now * 0.01)) * 0.02;
+        crab.rotation.z = Math.sin(now * 0.01) * 0.1;
+        
+        // Keep crabs on beach
+        if (Math.abs(crab.position.x) > 30) crab.userData.direction += Math.PI;
+        if (crab.position.z < 15 || crab.position.z > 45) crab.userData.direction += Math.PI;
+    });
+    
+    // Animate fish
+    fishes.forEach(fish => {
+        const now = Date.now();
+        
+        if (now > fish.userData.jumpTime) {
+            const jumpProgress = (now - fish.userData.jumpTime) / fish.userData.jumpDuration;
+            
+            if (jumpProgress < 1) {
+                // Jumping arc
+                const arc = Math.sin(jumpProgress * Math.PI);
+                fish.position.y = -3 + arc * 5;
+                fish.position.z = fish.userData.startPos.z + jumpProgress * 10;
+                
+                // Rotate during jump
+                fish.rotation.x = jumpProgress * Math.PI * 2;
+                fish.rotation.z = Math.sin(jumpProgress * Math.PI) * 0.3;
+            } else {
+                // Reset for next jump
+                fish.position.copy(fish.userData.startPos);
+                fish.userData.jumpTime = now + 5000 + Math.random() * 10000;
+                fish.rotation.set(0, 0, 0);
+            }
+        } else {
+            // Swimming underwater
+            fish.position.y = -3 + Math.sin(now * 0.001) * 0.2;
+            fish.rotation.z = Math.sin(now * 0.002) * 0.1;
         }
     });
     
