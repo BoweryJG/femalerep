@@ -1813,19 +1813,20 @@ body[data-theme="gold"] {
 /* Responsive Design - Mobile Optimized with All Luxury Details */
 @media (max-width: 768px) {
     .gauge-container {
-        /* Position pad all the way at the top */
+        /* Position pad all the way at the top, full width */
         position: fixed;
         top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        right: 0;
+        transform: none;
         
-        /* Half width design for mobile */
-        gap: 15px;
+        /* Full width design for mobile navbar style */
+        gap: 20px;
         padding: 20px 15px;
-        width: 50vw;
-        max-width: 280px;
+        width: 100vw;
+        max-width: none;
         min-height: 180px;
-        border-radius: 15px;
+        border-radius: 0; /* No border radius for full width */
         
         /* Ensure proper flex layout */
         display: flex !important;
@@ -2115,17 +2116,20 @@ body[data-theme="gold"] {
     }
 }
 
-/* Small mobile devices - Half width at top */
+/* Small mobile devices - Full width at top */
 @media (max-width: 480px) {
     .gauge-container {
-        /* All the way at the top, half width */
+        /* All the way at the top, full width */
         top: 8px;
+        left: 0;
+        right: 0;
+        transform: none;
         padding: 18px 12px;
-        gap: 12px;
-        width: 50vw;
-        max-width: 260px;
+        gap: 15px;
+        width: 100vw;
+        max-width: none;
         min-height: 160px;
-        border-radius: 12px;
+        border-radius: 0;
     }
     
     .gauge {
