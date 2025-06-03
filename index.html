@@ -17,12 +17,35 @@
                 <h1 class="brand-name">Diamond Line</h1>
             </div>
             
-            <div class="gauge-container" id="gaugeContainer">
+            <div class="gauge-container" id="gaugeContainer" data-leather-pattern="classic">
                 <!-- Leather stitching details -->
                 <div class="leather-stitching top-stitch"></div>
                 <div class="leather-stitching bottom-stitch"></div>
                 <div class="leather-stitching left-stitch"></div>
                 <div class="leather-stitching right-stitch"></div>
+                
+                <!-- Pattern Toggle Controls -->
+                <div class="pattern-toggle-controls">
+                    <div class="pattern-toggle-icon">⚙️</div>
+                    <div class="pattern-options">
+                        <div class="pattern-option active" data-pattern="classic">Classic Grain</div>
+                        <div class="pattern-option" data-pattern="crocodile">Crocodile Emboss</div>
+                        <div class="pattern-option" data-pattern="quilted">Quilted Luxury</div>
+                        <div class="pattern-option" data-pattern="herringbone">Herringbone Weave</div>
+                        <div class="pattern-option" data-pattern="carbon">Carbon Fiber</div>
+                    </div>
+                </div>
+                
+                <!-- Time Mode Toggle -->
+                <div class="time-mode-controls">
+                    <div class="time-mode-icon">🌅</div>
+                    <div class="time-mode-options">
+                        <div class="time-mode-option active" data-mode="day">Day</div>
+                        <div class="time-mode-option" data-mode="dusk">Dusk</div>
+                        <div class="time-mode-option" data-mode="night">Night</div>
+                    </div>
+                </div>
+                
                 <!-- Gauges will be dynamically inserted here -->
             </div>
             

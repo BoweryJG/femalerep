@@ -721,9 +721,9 @@ foamLine2.position.z = 15;
 foamLine2.scale.x = 0.8;
 shorelineGroup.add(foamLine2);
 
-// Wet sand effect
-const wetSandGeometry = new THREE.PlaneGeometry(200, 40, 64, 16);
-const wetSandMaterial = new THREE.MeshStandardMaterial({
+// Wet sand effect near shore
+const shoreWetSandGeometry = new THREE.PlaneGeometry(200, 40, 64, 16);
+const shoreWetSandMaterial = new THREE.MeshStandardMaterial({
     color: 0xd4a574,
     roughness: 0.3,
     metalness: 0.1,
@@ -731,10 +731,10 @@ const wetSandMaterial = new THREE.MeshStandardMaterial({
     opacity: 0.6
 });
 
-const wetSand = new THREE.Mesh(wetSandGeometry, wetSandMaterial);
-wetSand.rotation.x = -Math.PI / 2;
-wetSand.position.set(0, -1.45, 20);
-shorelineGroup.add(wetSand);
+const shoreWetSand = new THREE.Mesh(shoreWetSandGeometry, shoreWetSandMaterial);
+shoreWetSand.rotation.x = -Math.PI / 2;
+shoreWetSand.position.set(0, -1.45, 20);
+shorelineGroup.add(shoreWetSand);
 
 // Wave crests (breaking waves)
 for (let i = 0; i < 3; i++) {
@@ -1050,18 +1050,51 @@ function createGaugeElement(label, value, maxValue = 100) {
             currentNeedleValue = parseInt(parentGauge.dataset.currentValue);
         }
         
-        // Quick spin animation on hover
-        gsap.to(needle, {
-            rotation: "+=360",
-            duration: 0.8,
-            ease: "power2.inOut",
-            onComplete: function() {
-                // Return to current value
-                gsap.set(needle, {
-                    rotation: currentNeedleValue * 1.8 - 90
-                });
-            }
-        });
+        // Kill any existing animations
+        gsap.killTweensOf(needle);
+        
+        // Luxurious hover animation with weighted feel
+        const hoverTimeline = gsap.timeline();
+        
+        hoverTimeline
+            // Elegant anticipation
+            .to(needle, {
+                rotation: currentNeedleValue * 1.8 - 90 - 15,
+                duration: 0.3,
+                ease: "power2.out"
+            })
+            // Dramatic weighted spin
+            .to(needle, {
+                rotation: "+=450", // 1.25 rotations
+                duration: 1.8,
+                ease: "power3.inOut",
+                onUpdate: function() {
+                    // Add sophisticated momentum feel
+                    const progress = this.progress();
+                    const momentum = Math.sin(progress * Math.PI) * 3;
+                    if (progress > 0.7) {
+                        gsap.set(needle, {
+                            rotation: gsap.getProperty(needle, "rotation") + momentum * (1 - progress)
+                        });
+                    }
+                }
+            })
+            // Precise luxury settle
+            .to(needle, {
+                rotation: currentNeedleValue * 1.8 - 90,
+                duration: 1.5,
+                ease: "elastic.out(1, 0.8)",
+                onComplete: function() {
+                    // Resume subtle breathing
+                    gsap.to(needle, {
+                        rotation: currentNeedleValue * 1.8 - 90 + 1,
+                        duration: 2,
+                        ease: "sine.inOut",
+                        yoyo: true,
+                        repeat: -1
+                    });
+                }
+            });
     });
     
     gaugeDiv.addEventListener('mouseleave', () => {
@@ -1127,33 +1160,54 @@ gauges.forEach((gauge, index) => {
     const needle = gaugeElement.querySelector('.gauge-needle');
     const valueDisplay = gaugeElement.querySelector('.gauge-value');
     
-    // Initial spin animation
-    gsap.fromTo(needle, 
-        {
-            rotation: -90
-        },
-        {
-            rotation: 270,
-            duration: 1.5,
-            ease: "power2.inOut",
-            delay: index * 0.1,
-            onComplete: function() {
-                // Then animate to actual value
-                gsap.to(needle, {
-                    rotation: gauge.value * 1.8 - 90,
-                    duration: 1.5,
-                    ease: "elastic.out(1, 0.5)",
-                    onUpdate: function() {
-                        const currentRotation = gsap.getProperty(needle, "rotation");
-                        const currentValue = Math.round((currentRotation + 90) / 1.8);
-                        if (currentValue >= 0 && currentValue <= 100) {
-                            valueDisplay.textContent = `${currentValue}%`;
-                        }
-                    }
+    // Luxurious theatrical weighted spin animation on load
+    const timeline = gsap.timeline({ delay: index * 0.2 });
+    
+    // Initial dramatic pause
+    timeline.set(needle, { rotation: -90 })
+        // First theatrical spin with acceleration
+        .to(needle, {
+            rotation: 630, // 1.75 full rotations
+            duration: 2.5,
+            ease: "power2.in",
+            onUpdate: function() {
+                // Add gentle wobble during spin
+                const progress = this.progress();
+                const wobble = Math.sin(progress * Math.PI * 8) * 2;
+                gsap.set(needle, { 
+                    rotation: gsap.getProperty(needle, "rotation") + wobble * (1 - progress)
                 });
             }
-        }
-    );
+        })
+        // Elegant deceleration and settle
+        .to(needle, {
+            rotation: gauge.value * 1.8 - 90,
+            duration: 3,
+            ease: "power4.out",
+            onUpdate: function() {
+                const currentRotation = gsap.getProperty(needle, "rotation");
+                const currentValue = Math.round((currentRotation + 90) / 1.8);
+                if (currentValue >= 0 && currentValue <= 100) {
+                    valueDisplay.textContent = `${currentValue}%`;
+                }
+            }
+        })
+        // Final precision adjustment with luxury ease
+        .to(needle, {
+            rotation: gauge.value * 1.8 - 90,
+            duration: 1.2,
+            ease: "back.out(1.7)",
+            onComplete: function() {
+                // Add subtle breathing animation
+                gsap.to(needle, {
+                    rotation: gauge.value * 1.8 - 90 + 1,
+                    duration: 2,
+                    ease: "sine.inOut",
+                    yoyo: true,
+                    repeat: -1
+                });
+            }
+        });
 });
 
 // Sparkle effect
@@ -1906,6 +1960,157 @@ function makeGaugesDraggable() {
 
 // Initialize gauge dragging
 setTimeout(makeGaugesDraggable, 1000);
+
+// Pattern Toggle System
+document.querySelectorAll('.pattern-option').forEach(option => {
+    option.addEventListener('click', () => {
+        const pattern = option.getAttribute('data-pattern');
+        
+        // Remove active class from all options
+        document.querySelectorAll('.pattern-option').forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        
+        // Apply pattern to gauge container
+        const gaugeContainer = document.getElementById('gaugeContainer');
+        gaugeContainer.setAttribute('data-leather-pattern', pattern);
+        
+        // Store preference
+        localStorage.setItem('leatherPattern', pattern);
+        
+        // Add luxury transition effect
+        gaugeContainer.style.transition = 'background 1s cubic-bezier(0.4, 0, 0.2, 1)';
+        setTimeout(() => {
+            gaugeContainer.style.transition = '';
+        }, 1000);
+    });
+});
+
+// Time Mode System
+let currentTimeMode = 'day';
+
+function updateTimeMode(mode) {
+    currentTimeMode = mode;
+    
+    // Update active state
+    document.querySelectorAll('.time-mode-option').forEach(opt => opt.classList.remove('active'));
+    document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+    
+    // Update scene lighting and colors
+    updateSceneLighting(mode);
+    
+    // Update UI theme
+    updateUITheme(mode);
+    
+    // Store preference
+    localStorage.setItem('timeMode', mode);
+}
+
+function updateSceneLighting(mode) {
+    if (!scene) return;
+    
+    switch(mode) {
+        case 'day':
+            // Bright daylight
+            ambientLight.intensity = 0.6;
+            ambientLight.color.setHex(0xffc0cb);
+            directionalLight.intensity = 1.2;
+            directionalLight.color.setHex(0xffd700);
+            
+            // Update sky
+            if (skyUniforms) {
+                skyUniforms['turbidity'].value = 2;
+                skyUniforms['rayleigh'].value = 1;
+                skyUniforms['mieCoefficient'].value = 0.003;
+                skyUniforms['mieDirectionalG'].value = 0.97;
+            }
+            
+            // Update water color
+            if (water && water.material) {
+                water.material.uniforms['waterColor'].value.setHex(0x006994);
+                water.material.uniforms['sunColor'].value.setHex(0xffffff);
+            }
+            break;
+            
+        case 'dusk':
+            // Golden hour lighting
+            ambientLight.intensity = 0.4;
+            ambientLight.color.setHex(0xff8c69);
+            directionalLight.intensity = 0.8;
+            directionalLight.color.setHex(0xff6347);
+            
+            // Update sky for sunset
+            if (skyUniforms) {
+                skyUniforms['turbidity'].value = 8;
+                skyUniforms['rayleigh'].value = 3;
+                skyUniforms['mieCoefficient'].value = 0.008;
+                skyUniforms['mieDirectionalG'].value = 0.85;
+            }
+            
+            // Update water color
+            if (water && water.material) {
+                water.material.uniforms['waterColor'].value.setHex(0x8b4513);
+                water.material.uniforms['sunColor'].value.setHex(0xff6347);
+            }
+            break;
+            
+        case 'night':
+            // Moonlit scene
+            ambientLight.intensity = 0.2;
+            ambientLight.color.setHex(0x4169e1);
+            directionalLight.intensity = 0.3;
+            directionalLight.color.setHex(0x87ceeb);
+            
+            // Update sky for night
+            if (skyUniforms) {
+                skyUniforms['turbidity'].value = 15;
+                skyUniforms['rayleigh'].value = 0.5;
+                skyUniforms['mieCoefficient'].value = 0.001;
+                skyUniforms['mieDirectionalG'].value = 0.95;
+            }
+            
+            // Update water color
+            if (water && water.material) {
+                water.material.uniforms['waterColor'].value.setHex(0x191970);
+                water.material.uniforms['sunColor'].value.setHex(0x87ceeb);
+            }
+            break;
+    }
+}
+
+function updateUITheme(mode) {
+    document.body.setAttribute('data-time-mode', mode);
+    
+    // Update time mode icon
+    const timeIcon = document.querySelector('.time-mode-icon');
+    switch(mode) {
+        case 'day':
+            timeIcon.textContent = '☀️';
+            break;
+        case 'dusk':
+            timeIcon.textContent = '🌅';
+            break;
+        case 'night':
+            timeIcon.textContent = '🌙';
+            break;
+    }
+}
+
+// Time Mode Event Listeners
+document.querySelectorAll('.time-mode-option').forEach(option => {
+    option.addEventListener('click', () => {
+        const mode = option.getAttribute('data-mode');
+        updateTimeMode(mode);
+    });
+});
+
+// Load saved preferences
+const savedPattern = localStorage.getItem('leatherPattern') || 'classic';
+const savedTimeMode = localStorage.getItem('timeMode') || 'day';
+
+document.getElementById('gaugeContainer').setAttribute('data-leather-pattern', savedPattern);
+document.querySelector(`[data-pattern="${savedPattern}"]`).classList.add('active');
+
+updateTimeMode(savedTimeMode);
 
 // Theme switching functionality
 document.querySelectorAll('.theme-option').forEach(option => {
