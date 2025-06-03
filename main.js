@@ -909,6 +909,52 @@ for (let i = 0; i < 5; i++) {
 
 // Diamond particles - removed for cleaner look
 
+// Global needle animation state tracker
+const needleAnimationState = new WeakMap();
+
+// Centralized needle animation function to prevent twitching
+function animateNeedle(needle, targetRotation, duration = 3, ease = "power4.inOut", onComplete = null) {
+    // Get current animation state
+    const currentAnimation = needleAnimationState.get(needle);
+    
+    // Kill any existing animation completely
+    if (currentAnimation) {
+        currentAnimation.kill();
+        needleAnimationState.delete(needle);
+    }
+    
+    // Also kill any other animations on this needle
+    gsap.killTweensOf(needle);
+    
+    // Create new animation with absolute control
+    const animation = gsap.to(needle, {
+        rotation: targetRotation,
+        duration: duration,
+        ease: ease,
+        overwrite: true,
+        immediateRender: true,
+        onComplete: function() {
+            // Clean up animation reference
+            needleAnimationState.delete(needle);
+            
+            // Ensure needle is at exact final position
+            gsap.set(needle, {
+                rotation: targetRotation,
+                immediateRender: true,
+                overwrite: true
+            });
+            
+            // Call custom complete handler if provided
+            if (onComplete) onComplete();
+        }
+    });
+    
+    // Store animation reference
+    needleAnimationState.set(needle, animation);
+    
+    return animation;
+}
+
 // Create luxury gauges
 function createGaugeElement(label, value, maxValue = 100) {
     const gaugeDiv = document.createElement('div');
@@ -1061,23 +1107,15 @@ function createGaugeElement(label, value, maxValue = 100) {
             .to(needle, {
                 rotation: currentNeedleValue * 1.8 - 90 - 8, // Smaller anticipation
                 duration: 0.8, // Slower wind-up
-                ease: "power2.inOut"
+                ease: "power2.inOut",
+                overwrite: true
             })
             // Heavy, luxurious spin with momentum
             .to(needle, {
                 rotation: "+=380", // Just over 1 rotation
-                duration: 3.5, // Much slower spin
-                ease: "power2.inOut", // Smooth, weighted ease
-                onUpdate: function() {
-                    // Add very subtle weighted wobble
-                    const progress = this.progress();
-                    const wobble = Math.sin(progress * Math.PI * 4) * 0.8; // Subtle wobble
-                    if (progress > 0.8) {
-                        gsap.set(needle, {
-                            rotation: gsap.getProperty(needle, "rotation") + wobble * (1 - progress)
-                        });
-                    }
-                }
+                duration: 4.5, // Even slower, heavier spin
+                ease: "power4.inOut", // Maximum weight and smoothness
+                overwrite: 'auto'
             })
             // Slow, weighted settle - like a pendulum coming to rest
             .to(needle, {
@@ -1085,14 +1123,10 @@ function createGaugeElement(label, value, maxValue = 100) {
                 duration: 2.5, // Slow settle
                 ease: "power4.out", // Heavy ease out
                 onComplete: function() {
-                    // Resume luxurious breathing
-                    gsap.to(needle, {
-                        rotation: currentNeedleValue * 1.8 - 90 + 0.3,
-                        duration: 6,
-                        ease: "power1.inOut",
-                        yoyo: true,
-                        repeat: -1,
-                        yoyoEase: "power1.inOut"
+                    // Needle comes to complete rest - true luxury is stillness
+                    gsap.set(needle, {
+                        rotation: currentNeedleValue * 1.8 - 90,
+                        overwrite: true
                     });
                 }
             });
@@ -1117,31 +1151,21 @@ function createGaugeElement(label, value, maxValue = 100) {
             parentGauge.dataset.currentValue = newValue;
         }
         
-        // Kill existing animations first
-        gsap.killTweensOf(needle);
+        // Use centralized animation control for click
+        animateNeedle(needle, newRotation, 3, "power4.inOut");
         
-        // Luxurious weighted value change animation
-        gsap.to(needle, {
-            rotation: newRotation,
-            duration: 3, // Slow, weighted movement
-            ease: "power4.inOut", // Heavy, smooth ease
-            onUpdate: function() {
-                const currentRotation = gsap.getProperty(needle, "rotation");
-                const currentValue = Math.round((currentRotation + 90) / 1.8);
-                valueDisplay.textContent = `${currentValue}%`;
-            },
-            onComplete: function() {
-                // Resume breathing after value change
-                gsap.to(needle, {
-                    rotation: newRotation + 0.3,
-                    duration: 6,
-                    ease: "power1.inOut",
-                    yoyo: true,
-                    repeat: -1,
-                    yoyoEase: "power1.inOut"
-                });
-            }
-        });
+        // Update value display during animation
+        const updateClickValue = () => {
+            const currentRotation = gsap.getProperty(needle, "rotation");
+            const currentValue = Math.round((currentRotation + 90) / 1.8);
+            valueDisplay.textContent = `${currentValue}%`;
+        };
+        
+        gsap.ticker.add(updateClickValue);
+        setTimeout(() => {
+            gsap.ticker.remove(updateClickValue);
+            valueDisplay.textContent = `${newValue}%`;
+        }, 3000);
         
         // Play chime sound
         const chimeSound = document.getElementById('chimeSound');
@@ -1187,16 +1211,9 @@ function initGaugeAnimations(gaugeElement, value, index) {
         // First theatrical spin with acceleration
         .to(needle, {
             rotation: 630, // 1.75 full rotations
-            duration: 2.5,
-            ease: "power2.in",
-            onUpdate: function() {
-                // Add gentle wobble during spin
-                const progress = this.progress();
-                const wobble = Math.sin(progress * Math.PI * 8) * 2;
-                gsap.set(needle, { 
-                    rotation: gsap.getProperty(needle, "rotation") + wobble * (1 - progress)
-                });
-            }
+            duration: 3, // Slower initial spin
+            ease: "power3.in", // Heavier acceleration
+            overwrite: true
         })
         // Elegant deceleration and settle
         .to(needle, {
@@ -1217,14 +1234,10 @@ function initGaugeAnimations(gaugeElement, value, index) {
             duration: 1.2,
             ease: "back.out(1.7)",
             onComplete: function() {
-                // Add luxurious weighted breathing animation - slow and smooth
-                gsap.to(needle, {
-                    rotation: value * 1.8 - 90 + 0.3, // Very subtle movement
-                    duration: 6, // Slow, luxurious pace
-                    ease: "power1.inOut", // Smooth, weighted ease
-                    yoyo: true,
-                    repeat: -1,
-                    yoyoEase: "power1.inOut" // Smooth return motion
+                // Needle comes to complete rest - no breathing, just confident stillness
+                gsap.set(needle, {
+                    rotation: value * 1.8 - 90,
+                    overwrite: true
                 });
             }
         });
@@ -1831,31 +1844,28 @@ function updateDashboardData() {
             const newValue = Math.max(0, Math.min(100, currentValue + change));
             const newRotation = (newValue * 1.8) - 90;
             
-            // Kill any existing animations first
-            gsap.killTweensOf(needle);
-            
-            // Luxurious weighted real-time update animation
-            gsap.to(needle, {
-                rotation: newRotation,
-                duration: 4, // Much slower, weighted movement
-                ease: "power3.inOut", // Heavier, more luxurious ease
-                onUpdate: function() {
-                    const currentRotation = gsap.getProperty(needle, "rotation");
-                    const currentValue = Math.round((currentRotation + 90) / 1.8);
-                    valueDisplay.textContent = `${currentValue}%`;
-                },
-                onComplete: function() {
-                    // Resume luxurious breathing animation after update
-                    gsap.to(needle, {
-                        rotation: newRotation + 0.3, // Very subtle breathing
-                        duration: 6, // Slow breathing pace
-                        ease: "power1.inOut",
-                        yoyo: true,
-                        repeat: -1,
-                        yoyoEase: "power1.inOut"
-                    });
+            // Use centralized animation control
+            animateNeedle(needle, newRotation, 4, "power3.inOut", function() {
+                // Update the stored value
+                const parentGauge = randomGauge;
+                if (parentGauge) {
+                    parentGauge.dataset.currentValue = newValue;
                 }
             });
+            
+            // Update value display during animation
+            const updateValueDisplay = () => {
+                const currentRotation = gsap.getProperty(needle, "rotation");
+                const currentValue = Math.round((currentRotation + 90) / 1.8);
+                valueDisplay.textContent = `${currentValue}%`;
+            };
+            
+            // Use ticker for smooth value updates
+            gsap.ticker.add(updateValueDisplay);
+            setTimeout(() => {
+                gsap.ticker.remove(updateValueDisplay);
+                valueDisplay.textContent = `${newValue}%`;
+            }, 4000);
             
             // Add subtle glow effect on update
             randomGauge.style.filter = 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))';
@@ -2055,26 +2065,25 @@ function initPatternSelector() {
                         rotation: baseRotation - 15, // Subtle anticipation
                         duration: 0.8,
                         delay: index * 0.15,
-                        ease: "power2.inOut"
+                        ease: "power2.inOut",
+                        overwrite: true
                     })
                     .to(needle, {
                         rotation: baseRotation + 365, // Just over 1 rotation
                         duration: 3.5, // Slow, luxurious spin
-                        ease: "power3.inOut" // Heavy, weighted ease
+                        ease: "power3.inOut", // Heavy, weighted ease
+                        overwrite: 'auto'
                     })
                     .to(needle, {
                         rotation: baseRotation,
                         duration: 2, // Slow settle
                         ease: "power4.out",
+                        overwrite: 'auto',
                         onComplete: function() {
-                            // Resume breathing animation
-                            gsap.to(needle, {
-                                rotation: baseRotation + 0.3,
-                                duration: 6,
-                                ease: "power1.inOut",
-                                yoyo: true,
-                                repeat: -1,
-                                yoyoEase: "power1.inOut"
+                            // Needle comes to complete rest - stillness is luxury
+                            gsap.set(needle, {
+                                rotation: baseRotation,
+                                overwrite: true
                             });
                         }
                     });

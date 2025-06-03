@@ -220,7 +220,7 @@ body {
     bottom: 50%;
     transform-origin: bottom center;
     transform: translateX(-50%) rotate(0deg);
-    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 1s ease;
+    transition: background 1s ease; /* Removed transform transition - GSAP handles all movement */
     filter: drop-shadow(0 0 15px var(--gauge-glow));
     border-radius: 1px 1px 0 0;
 }
