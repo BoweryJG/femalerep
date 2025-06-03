@@ -919,6 +919,11 @@ function createSparkle(element) {
     });
 }
 
+// Create tropical island before starting animations
+const tropicalIsland = createTropicalIsland();
+tropicalIsland.position.set(-30, 0, -20);
+scene.add(tropicalIsland);
+
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
@@ -1373,11 +1378,6 @@ function createTropicalIsland() {
     
     return islandGroup;
 }
-
-// Add tropical island to scene
-const tropicalIsland = createTropicalIsland();
-tropicalIsland.position.set(-30, 0, -20);
-scene.add(tropicalIsland);
 
 // Add diamond particles to UI
 function createDiamondParticles() {
