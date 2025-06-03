@@ -927,3 +927,87 @@ function updateDashboardData() {
 
 // Initialize real-time updates
 setTimeout(updateDashboardData, 2000);
+
+// Theme switching functionality
+document.querySelectorAll('.theme-option').forEach(option => {
+    option.addEventListener('click', () => {
+        const theme = option.getAttribute('data-theme');
+        
+        // Remove active class from all options
+        document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        
+        // Apply theme
+        document.body.setAttribute('data-theme', theme);
+        
+        // Store preference
+        localStorage.setItem('diamondLineTheme', theme);
+        
+        // Update colors with smooth transition
+        updateThemeColors(theme);
+    });
+});
+
+// Load saved theme on startup
+const savedTheme = localStorage.getItem('diamondLineTheme') || 'diamond';
+document.body.setAttribute('data-theme', savedTheme);
+document.querySelector(`[data-theme="${savedTheme}"]`).classList.add('active');
+
+// Update theme colors dynamically
+function updateThemeColors(theme) {
+    const themes = {
+        diamond: {
+            primary: '#FFD700',
+            secondary: '#FF1493',
+            accent: '#FFB6C1',
+            glow: 'rgba(255, 215, 0, 0.8)'
+        },
+        emerald: {
+            primary: '#50C878',
+            secondary: '#228B22',
+            accent: '#90EE90',
+            glow: 'rgba(80, 200, 120, 0.8)'
+        },
+        sapphire: {
+            primary: '#0F52BA',
+            secondary: '#4169E1',
+            accent: '#87CEEB',
+            glow: 'rgba(65, 105, 225, 0.8)'
+        },
+        ruby: {
+            primary: '#E0115F',
+            secondary: '#DC143C',
+            accent: '#FA8072',
+            glow: 'rgba(224, 17, 95, 0.8)'
+        },
+        obsidian: {
+            primary: '#C0C0C0',
+            secondary: '#808080',
+            accent: '#D3D3D3',
+            glow: 'rgba(192, 192, 192, 0.8)'
+        }
+    };
+    
+    const colors = themes[theme];
+    
+    // Animate gauge elements
+    gsap.to('.gauge-value', {
+        duration: 1,
+        ease: 'power2.inOut',
+        onUpdate: function() {
+            document.querySelectorAll('.gauge-value').forEach(el => {
+                el.style.background = `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`;
+            });
+        }
+    });
+    
+    // Update gauge center glow
+    document.querySelectorAll('.gauge-center').forEach(el => {
+        el.style.boxShadow = `0 0 30px ${colors.glow}`;
+    });
+    
+    // Update needle colors
+    document.querySelectorAll('.gauge-needle').forEach(el => {
+        el.style.filter = `drop-shadow(0 0 15px ${colors.glow})`;
+    });
+}

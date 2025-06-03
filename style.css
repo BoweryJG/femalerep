@@ -230,19 +230,13 @@ body {
     position: absolute;
     width: 3px;
     height: 45%;
-    background: linear-gradient(to top, 
-        transparent 0%, 
-        #8B0000 20%,
-        #FF1493 40%, 
-        #FFD700 80%,
-        #FFFFFF 100%
-    );
+    background: var(--needle-gradient);
     left: 50%;
     bottom: 50%;
     transform-origin: bottom center;
     transform: translateX(-50%) rotate(0deg);
-    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: drop-shadow(0 0 15px rgba(255, 20, 147, 0.8));
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 1s ease;
+    filter: drop-shadow(0 0 15px var(--gauge-glow));
     border-radius: 1px 1px 0 0;
 }
 
@@ -411,21 +405,24 @@ body {
 
 .gauge-value {
     position: absolute;
-    top: 55%;
+    bottom: 15px;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #FFD700 0%, #FF1493 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    text-shadow: 0 2px 10px var(--gauge-glow);
+    letter-spacing: 0.05em;
 }
 
 .gauge:hover .gauge-value {
     opacity: 1;
+    transform: translateX(-50%) translateY(-5px);
 }
 
 .stats-panel {
@@ -754,6 +751,124 @@ body {
         transparent 2px,
         transparent 8px
     );
+}
+
+/* Theme Toggle */
+.theme-toggle {
+    position: fixed;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+}
+
+.theme-toggle-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle-icon:hover {
+    transform: scale(1.1) rotate(180deg);
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 0 8px 30px rgba(255, 215, 0, 0.4);
+}
+
+.theme-options {
+    position: absolute;
+    right: 70px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.theme-toggle:hover .theme-options {
+    opacity: 1;
+    visibility: visible;
+    right: 80px;
+}
+
+.theme-option {
+    padding: 12px 20px;
+    margin: 5px 0;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.theme-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(-5px);
+}
+
+.theme-option.active {
+    background: linear-gradient(135deg, #FFD700 0%, #FF1493 100%);
+    color: #000000;
+    font-weight: 500;
+}
+
+/* Theme Variables */
+:root {
+    --primary-color: #FFD700;
+    --secondary-color: #FF1493;
+    --accent-color: #FFB6C1;
+    --gauge-glow: rgba(255, 215, 0, 0.8);
+    --needle-gradient: linear-gradient(to top, transparent 0%, #8B0000 20%, #FF1493 40%, #FFD700 80%, #FFFFFF 100%);
+}
+
+body[data-theme="emerald"] {
+    --primary-color: #50C878;
+    --secondary-color: #228B22;
+    --accent-color: #90EE90;
+    --gauge-glow: rgba(80, 200, 120, 0.8);
+    --needle-gradient: linear-gradient(to top, transparent 0%, #013220 20%, #228B22 40%, #50C878 80%, #FFFFFF 100%);
+}
+
+body[data-theme="sapphire"] {
+    --primary-color: #0F52BA;
+    --secondary-color: #4169E1;
+    --accent-color: #87CEEB;
+    --gauge-glow: rgba(65, 105, 225, 0.8);
+    --needle-gradient: linear-gradient(to top, transparent 0%, #000080 20%, #4169E1 40%, #0F52BA 80%, #FFFFFF 100%);
+}
+
+body[data-theme="ruby"] {
+    --primary-color: #E0115F;
+    --secondary-color: #DC143C;
+    --accent-color: #FA8072;
+    --gauge-glow: rgba(224, 17, 95, 0.8);
+    --needle-gradient: linear-gradient(to top, transparent 0%, #8B0000 20%, #DC143C 40%, #E0115F 80%, #FFFFFF 100%);
+}
+
+body[data-theme="obsidian"] {
+    --primary-color: #C0C0C0;
+    --secondary-color: #808080;
+    --accent-color: #D3D3D3;
+    --gauge-glow: rgba(192, 192, 192, 0.8);
+    --needle-gradient: linear-gradient(to top, transparent 0%, #000000 20%, #808080 40%, #C0C0C0 80%, #FFFFFF 100%);
 }
 
 /* Diamond particles overlay */
