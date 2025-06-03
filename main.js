@@ -1517,7 +1517,6 @@ function makeElementDraggable(element) {
 }
 
 // Make gauge container (leather pad) draggable
-const gaugeContainer = document.getElementById('gaugeContainer');
 makeElementDraggable(gaugeContainer);
 
 // Make individual gauges draggable
