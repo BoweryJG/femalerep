@@ -996,18 +996,18 @@ function createGaugeElement(label, value, maxValue = 100) {
         </div>
     `;
     
-    // Create diamond bezel
-    let diamondBezelHTML = '<div class="gauge-bezel">';
+    // Create luxury bezel
+    let luxuryBezelHTML = '<div class="gauge-bezel">';
     for (let i = 0; i < 60; i++) {
         const angle = (i * 6) - 90;
-        const isDiamond = i % 5 === 0;
-        if (isDiamond) {
-            diamondBezelHTML += `<div class="bezel-diamond" style="transform: rotate(${angle}deg) translateY(-95px)">
-                <div class="diamond-sparkle"></div>
+        const isJewel = i % 5 === 0;
+        if (isJewel) {
+            luxuryBezelHTML += `<div class="bezel-jewel" style="transform: rotate(${angle}deg) translateY(-95px)">
+                <div class="jewel-sparkle"></div>
             </div>`;
         }
     }
-    diamondBezelHTML += '</div>';
+    luxuryBezelHTML += '</div>';
     
     // Create complications (mini dials)
     const complicationsHTML = `
@@ -1031,7 +1031,7 @@ function createGaugeElement(label, value, maxValue = 100) {
             <div class="gauge-needle" data-value="${value}"></div>
             <div class="gauge-center"></div>
             <div class="gauge-value">${value}%</div>
-            ${diamondBezelHTML}
+            ${luxuryBezelHTML}
         </div>
         <div class="gauge-label">${label}</div>
     `;
@@ -1745,10 +1745,10 @@ function createTropicalIsland() {
     return islandGroup;
 }
 
-// Add diamond particles to UI
-function createDiamondParticles() {
+// Add luxury particles to UI
+function createLuxuryParticles() {
     const particlesContainer = document.createElement('div');
-    particlesContainer.className = 'diamond-particles';
+    particlesContainer.className = 'luxury-particles';
     document.getElementById('app').appendChild(particlesContainer);
     
     setInterval(() => {
@@ -1766,7 +1766,7 @@ function createDiamondParticles() {
     }, 2000);
 }
 
-createDiamondParticles();
+createLuxuryParticles();
 
 // Real-time data updates
 function updateDashboardData() {
@@ -2104,13 +2104,152 @@ document.querySelectorAll('.time-mode-option').forEach(option => {
 });
 
 // Load saved preferences
-const savedPattern = localStorage.getItem('leatherPattern') || 'classic';
+const savedPattern = localStorage.getItem('leatherPattern') || 'alligator';
 const savedTimeMode = localStorage.getItem('timeMode') || 'day';
 
 document.getElementById('gaugeContainer').setAttribute('data-leather-pattern', savedPattern);
-document.querySelector(`[data-pattern="${savedPattern}"]`).classList.add('active');
+document.querySelector(`[data-pattern="${savedPattern}"]`)?.classList.add('active');
 
 updateTimeMode(savedTimeMode);
+
+// Make all UI elements draggable
+function makeUIElementsDraggable() {
+    const draggableElements = [
+        '.stats-panel',
+        '.theme-toggle', 
+        '.brand-mark'
+    ];
+    
+    draggableElements.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (!element) return;
+        
+        let isDragging = false;
+        let startX, startY, offsetX, offsetY;
+        
+        // Add draggable cursor
+        element.style.cursor = 'move';
+        
+        // Mouse events
+        element.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            const rect = element.getBoundingClientRect();
+            offsetX = startX - rect.left;
+            offsetY = startY - rect.top;
+            
+            element.style.zIndex = '10000';
+            element.style.userSelect = 'none';
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const newX = e.clientX - offsetX;
+            const newY = e.clientY - offsetY;
+            
+            // Keep within viewport bounds
+            const maxX = window.innerWidth - element.offsetWidth;
+            const maxY = window.innerHeight - element.offsetHeight;
+            
+            const boundedX = Math.max(0, Math.min(newX, maxX));
+            const boundedY = Math.max(0, Math.min(newY, maxY));
+            
+            element.style.position = 'fixed';
+            element.style.left = boundedX + 'px';
+            element.style.top = boundedY + 'px';
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
+            element.style.transform = 'none';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                element.style.zIndex = '';
+                element.style.userSelect = '';
+                
+                // Save position
+                const elementId = element.className.split(' ')[0];
+                localStorage.setItem(`${elementId}-position`, JSON.stringify({
+                    left: element.style.left,
+                    top: element.style.top
+                }));
+            }
+        });
+        
+        // Touch events for mobile
+        element.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            
+            const rect = element.getBoundingClientRect();
+            offsetX = startX - rect.left;
+            offsetY = startY - rect.top;
+            
+            element.style.zIndex = '10000';
+            e.preventDefault();
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            const touch = e.touches[0];
+            const newX = touch.clientX - offsetX;
+            const newY = touch.clientY - offsetY;
+            
+            const maxX = window.innerWidth - element.offsetWidth;
+            const maxY = window.innerHeight - element.offsetHeight;
+            
+            const boundedX = Math.max(0, Math.min(newX, maxX));
+            const boundedY = Math.max(0, Math.min(newY, maxY));
+            
+            element.style.position = 'fixed';
+            element.style.left = boundedX + 'px';
+            element.style.top = boundedY + 'px';
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
+            element.style.transform = 'none';
+            
+            e.preventDefault();
+        });
+        
+        document.addEventListener('touchend', () => {
+            if (isDragging) {
+                isDragging = false;
+                element.style.zIndex = '';
+                
+                // Save position
+                const elementId = element.className.split(' ')[0];
+                localStorage.setItem(`${elementId}-position`, JSON.stringify({
+                    left: element.style.left,
+                    top: element.style.top
+                }));
+            }
+        });
+        
+        // Restore saved position
+        const elementId = element.className.split(' ')[0];
+        const savedPosition = localStorage.getItem(`${elementId}-position`);
+        if (savedPosition) {
+            const position = JSON.parse(savedPosition);
+            element.style.position = 'fixed';
+            element.style.left = position.left;
+            element.style.top = position.top;
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
+            element.style.transform = 'none';
+        }
+    });
+}
+
+// Initialize UI dragging after a delay to ensure elements are loaded
+setTimeout(makeUIElementsDraggable, 1500);
 
 // Theme switching functionality
 document.querySelectorAll('.theme-option').forEach(option => {
@@ -2125,7 +2264,7 @@ document.querySelectorAll('.theme-option').forEach(option => {
         document.body.setAttribute('data-theme', theme);
         
         // Store preference
-        localStorage.setItem('diamondLineTheme', theme);
+        localStorage.setItem('luxuryTheme', theme);
         
         // Update colors with smooth transition
         updateThemeColors(theme);
@@ -2133,14 +2272,14 @@ document.querySelectorAll('.theme-option').forEach(option => {
 });
 
 // Load saved theme on startup
-const savedTheme = localStorage.getItem('diamondLineTheme') || 'diamond';
+const savedTheme = localStorage.getItem('luxuryTheme') || 'gold';
 document.body.setAttribute('data-theme', savedTheme);
-document.querySelector(`[data-theme="${savedTheme}"]`).classList.add('active');
+document.querySelector(`[data-theme="${savedTheme}"]`)?.classList.add('active');
 
 // Update theme colors dynamically
 function updateThemeColors(theme) {
     const themes = {
-        diamond: {
+        gold: {
             primary: '#FFD700',
             secondary: '#FF1493',
             accent: '#FFB6C1',

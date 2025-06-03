@@ -553,7 +553,7 @@ body {
     pointer-events: none;
 }
 
-.bezel-diamond {
+.bezel-jewel {
     position: absolute;
     width: 6px;
     height: 6px;
@@ -562,7 +562,7 @@ body {
     transform-origin: center center;
 }
 
-.bezel-diamond::before {
+.bezel-jewel::before {
     content: '';
     position: absolute;
     width: 100%;
@@ -573,11 +573,11 @@ body {
         rgba(255, 215, 0, 0.4) 100%
     );
     clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-    animation: diamondGlitter 4s ease-in-out infinite;
+    animation: jewelGlitter 4s ease-in-out infinite;
     animation-delay: calc(var(--i) * 0.1s);
 }
 
-.diamond-sparkle {
+.jewel-sparkle {
     position: absolute;
     width: 12px;
     height: 12px;
@@ -591,7 +591,7 @@ body {
     animation: sparkleFlash 3s ease-in-out infinite;
 }
 
-@keyframes diamondGlitter {
+@keyframes jewelGlitter {
     0%, 100% {
         transform: scale(1) rotate(0deg);
         filter: brightness(1);
@@ -843,101 +843,257 @@ body {
         );
 }
 
-/* Leather Pattern Variations */
-.gauge-container[data-leather-pattern="classic"] {
+/* Exotic Material Pattern Variations */
+
+/* Alligator/Crocodile - Realistic Scale Pattern */
+.gauge-container[data-leather-pattern="alligator"] {
     --leather-pattern: 
+        /* Base alligator green-brown color */
         linear-gradient(135deg, 
-            rgba(92, 51, 23, 0.95) 0%, 
-            rgba(139, 69, 19, 0.9) 50%, 
-            rgba(92, 51, 23, 0.95) 100%
+            rgba(45, 35, 25, 0.98) 0%, 
+            rgba(65, 50, 35, 0.95) 50%, 
+            rgba(45, 35, 25, 0.98) 100%
         ),
-        repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 3px,
-            rgba(0, 0, 0, 0.1) 3px,
-            rgba(0, 0, 0, 0.1) 6px
-        );
+        /* Large scales */
+        radial-gradient(ellipse 12px 8px at 20px 15px, 
+            rgba(0, 0, 0, 0.4) 30%, 
+            transparent 50%),
+        radial-gradient(ellipse 10px 6px at 45px 8px, 
+            rgba(0, 0, 0, 0.3) 30%, 
+            transparent 50%),
+        radial-gradient(ellipse 14px 9px at 8px 35px, 
+            rgba(0, 0, 0, 0.35) 30%, 
+            transparent 50%),
+        radial-gradient(ellipse 11px 7px at 38px 42px, 
+            rgba(0, 0, 0, 0.4) 30%, 
+            transparent 50%),
+        /* Scale highlights */
+        radial-gradient(ellipse 8px 5px at 22px 17px, 
+            rgba(255, 255, 255, 0.1) 20%, 
+            transparent 40%),
+        radial-gradient(ellipse 7px 4px at 47px 10px, 
+            rgba(255, 255, 255, 0.08) 20%, 
+            transparent 40%);
+    background-size: 50px 50px, 50px 50px, 50px 50px, 50px 50px, 50px 50px, 50px 50px, 50px 50px;
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
 }
 
-.gauge-container[data-leather-pattern="crocodile"] {
+/* Zebra - Bold Black and White Stripes */
+.gauge-container[data-leather-pattern="zebra"] {
     --leather-pattern: 
-        linear-gradient(135deg, 
-            rgba(40, 20, 10, 0.95) 0%, 
-            rgba(80, 40, 20, 0.9) 50%, 
-            rgba(40, 20, 10, 0.95) 100%
+        /* Base white */
+        linear-gradient(0deg, rgba(250, 248, 245, 0.95), rgba(250, 248, 245, 0.95)),
+        /* Curved zebra stripes */
+        repeating-linear-gradient(
+            15deg,
+            rgba(0, 0, 0, 0.9) 0px,
+            rgba(0, 0, 0, 0.9) 8px,
+            transparent 8px,
+            transparent 18px,
+            rgba(0, 0, 0, 0.85) 18px,
+            rgba(0, 0, 0, 0.85) 25px,
+            transparent 25px,
+            transparent 35px
         ),
+        repeating-linear-gradient(
+            -12deg,
+            rgba(0, 0, 0, 0.7) 0px,
+            rgba(0, 0, 0, 0.7) 6px,
+            transparent 6px,
+            transparent 22px
+        );
+    background-size: 100% 100%, 60px 60px, 45px 45px;
+}
+
+/* Leopard - Spotted Rosette Pattern */
+.gauge-container[data-leather-pattern="leopard"] {
+    --leather-pattern: 
+        /* Base golden leopard color */
+        linear-gradient(135deg, 
+            rgba(218, 165, 32, 0.95) 0%, 
+            rgba(255, 215, 0, 0.9) 50%, 
+            rgba(205, 133, 63, 0.95) 100%
+        ),
+        /* Large rosettes */
+        radial-gradient(circle 8px at 25px 20px, 
+            transparent 3px, 
+            rgba(0, 0, 0, 0.8) 4px, 
+            rgba(0, 0, 0, 0.8) 6px, 
+            transparent 7px),
+        radial-gradient(circle 6px at 55px 45px, 
+            transparent 2px, 
+            rgba(0, 0, 0, 0.7) 3px, 
+            rgba(0, 0, 0, 0.7) 5px, 
+            transparent 6px),
+        radial-gradient(circle 7px at 15px 60px, 
+            transparent 3px, 
+            rgba(0, 0, 0, 0.75) 4px, 
+            rgba(0, 0, 0, 0.75) 6px, 
+            transparent 7px),
+        /* Small spots */
+        radial-gradient(circle 3px at 40px 15px, rgba(0, 0, 0, 0.6) 50%, transparent 60%),
+        radial-gradient(circle 2px at 65px 25px, rgba(0, 0, 0, 0.5) 50%, transparent 60%),
+        radial-gradient(circle 4px at 8px 40px, rgba(0, 0, 0, 0.6) 50%, transparent 60%);
+    background-size: 100% 100%, 70px 70px, 70px 70px, 70px 70px, 70px 70px, 70px 70px, 70px 70px;
+}
+
+/* Ostrich - Distinctive Bumpy Follicle Pattern */
+.gauge-container[data-leather-pattern="ostrich"] {
+    --leather-pattern: 
+        /* Base ostrich leather color */
+        linear-gradient(135deg, 
+            rgba(139, 69, 19, 0.95) 0%, 
+            rgba(160, 82, 45, 0.9) 50%, 
+            rgba(139, 69, 19, 0.95) 100%
+        ),
+        /* Quill follicle bumps */
+        radial-gradient(circle 4px at 20px 15px, 
+            rgba(0, 0, 0, 0.6) 30%, 
+            rgba(0, 0, 0, 0.3) 60%, 
+            transparent 70%),
+        radial-gradient(circle 3px at 45px 25px, 
+            rgba(0, 0, 0, 0.5) 30%, 
+            rgba(0, 0, 0, 0.2) 60%, 
+            transparent 70%),
+        radial-gradient(circle 5px at 15px 50px, 
+            rgba(0, 0, 0, 0.7) 30%, 
+            rgba(0, 0, 0, 0.3) 60%, 
+            transparent 70%),
+        radial-gradient(circle 3px at 55px 8px, 
+            rgba(0, 0, 0, 0.5) 30%, 
+            rgba(0, 0, 0, 0.2) 60%, 
+            transparent 70%),
+        /* Raised bumps highlights */
+        radial-gradient(circle 2px at 22px 17px, rgba(255, 255, 255, 0.3) 40%, transparent 60%),
+        radial-gradient(circle 1px at 47px 27px, rgba(255, 255, 255, 0.2) 40%, transparent 60%);
+    background-size: 100% 100%, 65px 65px, 65px 65px, 65px 65px, 65px 65px, 65px 65px, 65px 65px;
+}
+
+/* Python Snake - Diamond Scale Pattern */
+.gauge-container[data-leather-pattern="snake"] {
+    --leather-pattern: 
+        /* Base snake color */
+        linear-gradient(135deg, 
+            rgba(85, 107, 47, 0.95) 0%, 
+            rgba(128, 128, 0, 0.9) 50%, 
+            rgba(85, 107, 47, 0.95) 100%
+        ),
+        /* Diamond scale pattern */
         repeating-conic-gradient(
-            from 0deg at 50% 50%,
-            transparent 0deg,
-            rgba(0, 0, 0, 0.2) 30deg,
-            transparent 60deg,
+            from 45deg at 25px 25px,
+            rgba(0, 0, 0, 0.4) 0deg,
+            rgba(0, 0, 0, 0.4) 90deg,
             rgba(255, 255, 255, 0.1) 90deg,
-            transparent 120deg
-        );
-}
-
-.gauge-container[data-leather-pattern="quilted"] {
-    --leather-pattern: 
-        linear-gradient(135deg, 
-            rgba(60, 30, 15, 0.95) 0%, 
-            rgba(120, 60, 30, 0.9) 50%, 
-            rgba(60, 30, 15, 0.95) 100%
+            rgba(255, 255, 255, 0.1) 180deg,
+            rgba(0, 0, 0, 0.4) 180deg,
+            rgba(0, 0, 0, 0.4) 270deg,
+            rgba(255, 255, 255, 0.1) 270deg,
+            rgba(255, 255, 255, 0.1) 360deg
         ),
-        repeating-linear-gradient(
-            0deg,
-            transparent 0px,
-            rgba(255, 255, 255, 0.1) 20px,
-            transparent 40px
-        ),
-        repeating-linear-gradient(
-            90deg,
-            transparent 0px,
-            rgba(0, 0, 0, 0.1) 20px,
-            transparent 40px
-        );
-}
-
-.gauge-container[data-leather-pattern="herringbone"] {
-    --leather-pattern: 
-        linear-gradient(135deg, 
-            rgba(70, 45, 25, 0.95) 0%, 
-            rgba(140, 90, 50, 0.9) 50%, 
-            rgba(70, 45, 25, 0.95) 100%
-        ),
+        /* Scale separation lines */
         repeating-linear-gradient(
             45deg,
             transparent 0px,
-            rgba(0, 0, 0, 0.15) 8px,
-            transparent 16px
-        ),
-        repeating-linear-gradient(
-            -45deg,
-            transparent 0px,
-            rgba(255, 255, 255, 0.05) 8px,
-            transparent 16px
+            rgba(0, 0, 0, 0.3) 12px,
+            rgba(0, 0, 0, 0.3) 13px,
+            transparent 13px,
+            transparent 25px
         );
+    background-size: 100% 100%, 25px 25px, 50px 50px;
 }
 
-.gauge-container[data-leather-pattern="carbon"] {
+/* Tiger - Orange with Bold Black Stripes */
+.gauge-container[data-leather-pattern="tiger"] {
     --leather-pattern: 
+        /* Base tiger orange */
         linear-gradient(135deg, 
-            rgba(20, 20, 20, 0.95) 0%, 
-            rgba(40, 40, 40, 0.9) 50%, 
-            rgba(20, 20, 20, 0.95) 100%
+            rgba(255, 140, 0, 0.95) 0%, 
+            rgba(255, 165, 0, 0.9) 50%, 
+            rgba(255, 140, 0, 0.95) 100%
+        ),
+        /* Irregular tiger stripes */
+        repeating-linear-gradient(
+            95deg,
+            rgba(0, 0, 0, 0.9) 0px,
+            rgba(0, 0, 0, 0.9) 6px,
+            transparent 6px,
+            transparent 25px,
+            rgba(0, 0, 0, 0.8) 25px,
+            rgba(0, 0, 0, 0.8) 32px,
+            transparent 32px,
+            transparent 48px
         ),
         repeating-linear-gradient(
-            0deg,
-            transparent 0px,
-            rgba(255, 255, 255, 0.05) 2px,
-            transparent 4px
-        ),
-        repeating-linear-gradient(
-            90deg,
-            transparent 0px,
-            rgba(0, 0, 0, 0.2) 2px,
-            transparent 4px
+            88deg,
+            rgba(0, 0, 0, 0.7) 0px,
+            rgba(0, 0, 0, 0.7) 4px,
+            transparent 4px,
+            transparent 35px
         );
+    background-size: 100% 100%, 80px 80px, 60px 60px;
+}
+
+/* Stingray - Unique Bumpy Pearl Pattern */
+.gauge-container[data-leather-pattern="stingray"] {
+    --leather-pattern: 
+        /* Base stingray color */
+        linear-gradient(135deg, 
+            rgba(47, 79, 79, 0.95) 0%, 
+            rgba(112, 128, 144, 0.9) 50%, 
+            rgba(47, 79, 79, 0.95) 100%
+        ),
+        /* Pearl-like bumps in rows */
+        radial-gradient(circle 2px at 10px 10px, rgba(255, 255, 255, 0.4) 40%, transparent 60%),
+        radial-gradient(circle 2px at 20px 10px, rgba(255, 255, 255, 0.3) 40%, transparent 60%),
+        radial-gradient(circle 2px at 30px 10px, rgba(255, 255, 255, 0.4) 40%, transparent 60%),
+        radial-gradient(circle 2px at 15px 20px, rgba(255, 255, 255, 0.3) 40%, transparent 60%),
+        radial-gradient(circle 2px at 25px 20px, rgba(255, 255, 255, 0.4) 40%, transparent 60%),
+        /* Shadows between pearls */
+        radial-gradient(circle 3px at 12px 12px, rgba(0, 0, 0, 0.3) 30%, transparent 50%),
+        radial-gradient(circle 3px at 22px 12px, rgba(0, 0, 0, 0.2) 30%, transparent 50%);
+    background-size: 100% 100%, 40px 30px, 40px 30px, 40px 30px, 40px 30px, 40px 30px, 40px 30px, 40px 30px;
+}
+
+/* Elephant - Wrinkled Aged Texture */
+.gauge-container[data-leather-pattern="elephant"] {
+    --leather-pattern: 
+        /* Base elephant gray */
+        linear-gradient(135deg, 
+            rgba(105, 105, 105, 0.95) 0%, 
+            rgba(128, 128, 128, 0.9) 50%, 
+            rgba(105, 105, 105, 0.95) 100%
+        ),
+        /* Deep wrinkle lines */
+        repeating-linear-gradient(
+            23deg,
+            rgba(0, 0, 0, 0.4) 0px,
+            rgba(0, 0, 0, 0.4) 2px,
+            transparent 2px,
+            transparent 15px
+        ),
+        repeating-linear-gradient(
+            67deg,
+            rgba(0, 0, 0, 0.3) 0px,
+            rgba(0, 0, 0, 0.3) 1px,
+            transparent 1px,
+            transparent 22px
+        ),
+        repeating-linear-gradient(
+            -15deg,
+            rgba(0, 0, 0, 0.2) 0px,
+            rgba(0, 0, 0, 0.2) 1px,
+            transparent 1px,
+            transparent 18px
+        ),
+        /* Texture highlights */
+        repeating-linear-gradient(
+            25deg,
+            rgba(255, 255, 255, 0.05) 0px,
+            rgba(255, 255, 255, 0.05) 1px,
+            transparent 1px,
+            transparent 12px
+        );
+    background-size: 100% 100%, 60px 60px, 45px 45px, 38px 38px, 55px 55px;
 }
 
 /* Pattern Toggle Controls */
@@ -1234,8 +1390,8 @@ body[data-time-mode="dusk"] .gauge-center {
     }
 }
 
-/* Diamond particles overlay */
-.diamond-particles {
+/* Luxury particles overlay */
+.luxury-particles {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -1267,4 +1423,13 @@ body[data-time-mode="dusk"] .gauge-center {
         transform: translateY(-100px) rotate(360deg);
         opacity: 0;
     }
+}
+
+/* Gold Theme */
+body[data-theme="gold"] {
+    --primary-color: #FFD700;
+    --secondary-color: #FF1493;
+    --accent-color: #FFB6C1;
+    --gauge-glow: rgba(255, 215, 0, 0.8);
+    --needle-gradient: linear-gradient(to top, transparent 0%, #8B0000 20%, #FF1493 40%, #FFD700 80%, #FFFFFF 100%);
 }
