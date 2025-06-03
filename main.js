@@ -16,14 +16,15 @@ const camera = new THREE.PerspectiveCamera(
 const renderer = new THREE.WebGLRenderer({ 
     canvas: document.getElementById('canvas'),
     antialias: true,
-    alpha: true
+    alpha: false
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.5;
+renderer.toneMappingExposure = 0.8;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
 
 // Camera positioning for beach view
 camera.position.set(0, 10, 30);
@@ -38,10 +39,10 @@ controls.minDistance = 10;
 controls.maxDistance = 100;
 
 // Lighting
-const ambientLight = new THREE.AmbientLight(0xffc0cb, 0.4);
+const ambientLight = new THREE.AmbientLight(0xffc0cb, 0.6);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffd700, 1);
+const directionalLight = new THREE.DirectionalLight(0xffd700, 1.2);
 directionalLight.position.set(100, 100, 50);
 directionalLight.castShadow = true;
 directionalLight.shadow.camera.near = 0.1;
@@ -70,7 +71,7 @@ const water = new Water(waterGeometry, {
     ),
     sunDirection: new THREE.Vector3(),
     sunColor: 0xffd700,
-    waterColor: 0x001e0f,
+    waterColor: 0x006994,
     distortionScale: 3.7,
     fog: scene.fog !== undefined
 });
@@ -84,10 +85,10 @@ sky.scale.setScalar(10000);
 scene.add(sky);
 
 const skyUniforms = sky.material.uniforms;
-skyUniforms['turbidity'].value = 10;
-skyUniforms['rayleigh'].value = 2;
-skyUniforms['mieCoefficient'].value = 0.005;
-skyUniforms['mieDirectionalG'].value = 0.8;
+skyUniforms['turbidity'].value = 2;
+skyUniforms['rayleigh'].value = 1;
+skyUniforms['mieCoefficient'].value = 0.003;
+skyUniforms['mieDirectionalG'].value = 0.97;
 
 // Sun position for sunset
 const sun = new THREE.Vector3();
@@ -1112,9 +1113,9 @@ function createTropicalIsland() {
     
     // Multiple material layers for realism
     const rockMaterial = new THREE.MeshStandardMaterial({
-        color: 0x8B7355,
-        roughness: 0.9,
-        metalness: 0.1,
+        color: 0xA0826D,
+        roughness: 0.8,
+        metalness: 0,
         normalScale: new THREE.Vector2(1, 1)
     });
     
@@ -1238,8 +1239,8 @@ function createTropicalIsland() {
     mermaidGroup.add(rockPlatform);
     
     // Mermaid body (simplified but recognizable)
-    // Upper body
-    const torsoGeometry = new THREE.CapsuleGeometry(0.8, 2, 8, 16);
+    // Upper body - more slender
+    const torsoGeometry = new THREE.CapsuleGeometry(0.5, 1.8, 8, 16);
     const skinMaterial = new THREE.MeshStandardMaterial({
         color: 0xFFDBD7,
         roughness: 0.6,
@@ -1248,17 +1249,18 @@ function createTropicalIsland() {
     const torso = new THREE.Mesh(torsoGeometry, skinMaterial);
     torso.position.set(0, 2.5, 0);
     torso.rotation.x = -Math.PI / 2 + 0.3;
+    torso.scale.set(0.8, 1, 0.7);
     mermaidGroup.add(torso);
     
-    // Mermaid tail
+    // Mermaid tail - more elegant
     const tailCurve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(0, 1.5, 0),
-        new THREE.Vector3(0, 1, 1),
-        new THREE.Vector3(0, 0.5, 2),
-        new THREE.Vector3(0, 0.3, 3)
+        new THREE.Vector3(0, 1, 0.8),
+        new THREE.Vector3(0, 0.5, 1.6),
+        new THREE.Vector3(0, 0.3, 2.5)
     ]);
     
-    const tailGeometry = new THREE.TubeGeometry(tailCurve, 20, 0.6, 8, false);
+    const tailGeometry = new THREE.TubeGeometry(tailCurve, 20, 0.4, 8, false);
     const tailMaterial = new THREE.MeshPhysicalMaterial({
         color: 0x20B2AA,
         metalness: 0.8,
@@ -1268,13 +1270,14 @@ function createTropicalIsland() {
         reflectivity: 1
     });
     const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+    tail.scale.set(1, 1, 1.2);
     mermaidGroup.add(tail);
     
-    // Tail fin
-    const finGeometry = new THREE.ConeGeometry(1.5, 2, 8);
-    finGeometry.scale(1, 0.3, 1);
+    // Tail fin - more elegant
+    const finGeometry = new THREE.ConeGeometry(1.2, 1.5, 8);
+    finGeometry.scale(1.5, 0.3, 1);
     const fin = new THREE.Mesh(finGeometry, tailMaterial);
-    fin.position.set(0, 0.3, 4);
+    fin.position.set(0, 0.3, 3);
     fin.rotation.x = Math.PI / 2;
     mermaidGroup.add(fin);
     
@@ -1331,7 +1334,7 @@ function createTropicalIsland() {
     // Position mermaid on island
     mermaidGroup.position.set(8, 0, -5);
     mermaidGroup.rotation.y = -Math.PI / 4;
-    mermaidGroup.scale.setScalar(1.2);
+    mermaidGroup.scale.setScalar(0.8);
     
     islandGroup.add(mermaidGroup);
     
