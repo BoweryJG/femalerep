@@ -1813,19 +1813,19 @@ body[data-theme="gold"] {
 /* Responsive Design - Mobile Optimized with All Luxury Details */
 @media (max-width: 768px) {
     .gauge-container {
-        /* Position pad at top center of screen */
+        /* Position pad all the way at the top */
         position: fixed;
-        top: 110px; /* Below brand mark */
+        top: 10px;
         left: 50%;
         transform: translateX(-50%);
         
-        /* Much larger sizing for mobile - prioritize visibility */
-        gap: 25px;
-        padding: 40px 30px;
-        width: 96vw;
-        max-width: 550px;
-        min-height: 300px; /* Ensure minimum height */
-        border-radius: 25px;
+        /* Half width design for mobile */
+        gap: 15px;
+        padding: 20px 15px;
+        width: 50vw;
+        max-width: 280px;
+        min-height: 180px;
+        border-radius: 15px;
         
         /* Ensure proper flex layout */
         display: flex !important;
@@ -1833,11 +1833,12 @@ body[data-theme="gold"] {
         align-items: center;
         flex-wrap: nowrap;
         visibility: visible !important;
+        z-index: 2000; /* Above brand mark */
     }
     
     .gauge {
-        width: 200px !important;
-        height: 200px !important;
+        width: 120px !important;
+        height: 120px !important;
         flex-shrink: 0;
         display: block !important;
         visibility: visible !important;
@@ -1847,49 +1848,49 @@ body[data-theme="gold"] {
     /* Remove the nth-of-type hiding - let JavaScript handle it */
     
     .gauge-label {
-        font-size: 1rem !important;
-        bottom: -35px;
-        letter-spacing: 0.1em;
+        font-size: 0.7rem !important;
+        bottom: -22px;
+        letter-spacing: 0.08em;
     }
     
     .gauge-value {
-        font-size: 2.4rem !important;
-        bottom: 18px;
+        font-size: 1.6rem !important;
+        bottom: 10px;
     }
     
     .gauge-number {
-        font-size: 0.75rem !important;
-        top: 22px;
-        transform-origin: center 95px; /* Adjusted for 200px gauge */
+        font-size: 0.55rem !important;
+        top: 14px;
+        transform-origin: center 55px; /* Adjusted for 120px gauge */
     }
     
     .gauge-needle {
-        height: 44% !important;
-        width: 3px !important;
+        height: 40% !important;
+        width: 2px !important;
     }
     
     .gauge-center {
-        width: 30px !important;
-        height: 30px !important;
+        width: 20px !important;
+        height: 20px !important;
     }
     
     .gauge-tick {
-        height: 14px !important;
-        top: 7px;
-        transform-origin: center 95px; /* Adjusted for 200px gauge */
+        height: 8px !important;
+        top: 4px;
+        transform-origin: center 55px; /* Adjusted for 120px gauge */
     }
     
     .gauge-tick.major {
-        height: 18px !important;
+        height: 12px !important;
     }
     
-    /* Brand mark - compact at very top */
+    /* Brand mark - below gauge container */
     .brand-mark {
         position: fixed;
-        top: 10px;
+        top: 200px; /* Below gauge container */
         left: 50%;
         transform: translateX(-50%);
-        gap: 8px;
+        gap: 6px;
         flex-direction: column;
         align-items: center;
         text-align: center;
@@ -1897,12 +1898,12 @@ body[data-theme="gold"] {
     }
     
     .brand-icon {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
     }
     
     .brand-name {
-        font-size: 1.1rem;
-        line-height: 1.2;
+        font-size: 1rem;
+        line-height: 1.1;
     }
     
     /* Stats panel - bottom position */
@@ -2114,75 +2115,75 @@ body[data-theme="gold"] {
     }
 }
 
-/* Small mobile devices - Still large enough for 2 gauges */
+/* Small mobile devices - Half width at top */
 @media (max-width: 480px) {
     .gauge-container {
-        /* Keep top positioning but ensure good size */
-        top: 100px;
-        padding: 35px 25px;
-        gap: 20px;
-        width: 98vw;
-        max-width: 460px;
-        min-height: 280px;
-        border-radius: 22px;
+        /* All the way at the top, half width */
+        top: 8px;
+        padding: 18px 12px;
+        gap: 12px;
+        width: 50vw;
+        max-width: 260px;
+        min-height: 160px;
+        border-radius: 12px;
     }
     
     .gauge {
-        width: 180px !important;
-        height: 180px !important;
+        width: 110px !important;
+        height: 110px !important;
         display: block !important;
         visibility: visible !important;
     }
     
     .gauge-center {
-        width: 28px !important;
-        height: 28px !important;
+        width: 18px !important;
+        height: 18px !important;
     }
     
     .gauge-needle {
-        height: 43% !important;
-        width: 2.8px !important;
+        height: 38% !important;
+        width: 1.8px !important;
     }
     
     .gauge-value {
-        font-size: 2.2rem !important;
-        bottom: 16px;
+        font-size: 1.4rem !important;
+        bottom: 8px;
     }
     
     .gauge-label {
-        font-size: 0.95rem !important;
-        bottom: -32px;
+        font-size: 0.65rem !important;
+        bottom: -20px;
     }
     
     .gauge-number {
-        font-size: 0.7rem !important;
-        top: 20px;
-        transform-origin: center 85px; /* Adjusted for 180px gauge */
+        font-size: 0.5rem !important;
+        top: 12px;
+        transform-origin: center 50px; /* Adjusted for 110px gauge */
     }
     
     .gauge-tick {
-        height: 12px !important;
-        top: 6px;
-        transform-origin: center 85px; /* Adjusted for 180px gauge */
+        height: 7px !important;
+        top: 3px;
+        transform-origin: center 50px; /* Adjusted for 110px gauge */
     }
     
     .gauge-tick.major {
-        height: 16px !important;
+        height: 10px !important;
     }
     
     /* Brand adjustments for very small screens */
     .brand-mark {
-        top: 8px;
-        gap: 6px;
+        top: 180px; /* Below smaller gauge container */
+        gap: 5px;
     }
     
     .brand-icon {
-        font-size: 1.6rem;
+        font-size: 1.3rem;
     }
     
     .brand-name {
-        font-size: 1rem;
-        line-height: 1.1;
+        font-size: 0.9rem;
+        line-height: 1;
     }
     
     /* Stats panel */
