@@ -418,6 +418,46 @@ for (let i = 0; i < 8; i++) {
     ));
 }
 
+// Create seaweed and kelp
+function createSeaweed(x, z) {
+    const seaweedGroup = new THREE.Group();
+    
+    // Create multiple strands
+    for (let i = 0; i < 3 + Math.random() * 3; i++) {
+        const strandCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 0, 0),
+            new THREE.Vector3((Math.random() - 0.5) * 0.5, 0.3, (Math.random() - 0.5) * 0.3),
+            new THREE.Vector3((Math.random() - 0.5) * 1, 0.8, (Math.random() - 0.5) * 0.5),
+            new THREE.Vector3((Math.random() - 0.5) * 1.5, 1.2, (Math.random() - 0.5) * 0.8)
+        ]);
+        
+        const strandGeometry = new THREE.TubeGeometry(strandCurve, 20, 0.02, 6, false);
+        const strandMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color().setHSL(0.25 + Math.random() * 0.1, 0.6, 0.2),
+            roughness: 0.8,
+            metalness: 0
+        });
+        
+        const strand = new THREE.Mesh(strandGeometry, strandMaterial);
+        strand.userData.originalRotation = strand.rotation.z;
+        seaweedGroup.add(strand);
+    }
+    
+    seaweedGroup.position.set(x, -1.4, z);
+    seaweedGroup.rotation.y = Math.random() * Math.PI * 2;
+    seaweedGroup.scale.setScalar(0.5 + Math.random() * 0.5);
+    
+    return seaweedGroup;
+}
+
+// Add scattered seaweed
+for (let i = 0; i < 15; i++) {
+    scene.add(createSeaweed(
+        (Math.random() - 0.5) * 80,
+        12 + Math.random() * 25
+    ));
+}
+
 // Add sand ripples
 const rippleGroup = new THREE.Group();
 for (let i = 0; i < 50; i++) {
@@ -455,6 +495,189 @@ for (let i = 0; i < 50; i++) {
     rippleGroup.add(ripple);
 }
 scene.add(rippleGroup);
+
+// Create footprints in sand
+function createFootprint(x, z, rotation = 0) {
+    const footprintGeometry = new THREE.CylinderGeometry(0.15, 0.18, 0.05, 8);
+    footprintGeometry.scale(1.5, 1, 1);
+    const footprintMaterial = new THREE.MeshStandardMaterial({
+        color: 0xd4a574,
+        roughness: 0.9,
+        metalness: 0
+    });
+    
+    const footprint = new THREE.Mesh(footprintGeometry, footprintMaterial);
+    footprint.position.set(x, -1.42, z);
+    footprint.rotation.y = rotation;
+    
+    return footprint;
+}
+
+// Add a trail of footprints
+const footprintTrail = [];
+for (let i = 0; i < 20; i++) {
+    const pathX = -20 + i * 2 + (Math.random() - 0.5) * 0.5;
+    const pathZ = 25 + Math.sin(i * 0.3) * 3;
+    const isLeft = i % 2 === 0;
+    
+    const footprint = createFootprint(
+        pathX + (isLeft ? -0.3 : 0.3),
+        pathZ,
+        Math.atan2(2, Math.cos(i * 0.3) * 3 * 0.3)
+    );
+    footprintTrail.push(footprint);
+    scene.add(footprint);
+}
+
+// Create wet sand near shoreline with reflections
+const wetSandGeometry = new THREE.PlaneGeometry(200, 40, 128, 32);
+const wetSandMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0xa67c4a,
+    roughness: 0.1,
+    metalness: 0.3,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.0,
+    reflectivity: 0.8,
+    transparent: true,
+    opacity: 0.9
+});
+
+// Create wet sand ripples
+const wetSandVertices = wetSandGeometry.attributes.position.array;
+for (let i = 0; i < wetSandVertices.length; i += 3) {
+    const x = wetSandVertices[i];
+    const y = wetSandVertices[i + 1];
+    wetSandVertices[i + 2] = Math.sin(x * 0.1) * 0.05 + Math.sin(y * 0.15) * 0.03;
+}
+wetSandGeometry.computeVertexNormals();
+
+const wetSand = new THREE.Mesh(wetSandGeometry, wetSandMaterial);
+wetSand.rotation.x = -Math.PI / 2;
+wetSand.position.set(0, -1.35, 10);
+wetSand.receiveShadow = true;
+scene.add(wetSand);
+
+// Create tidal pools
+function createTidalPool(x, z, size = 3) {
+    const poolGroup = new THREE.Group();
+    
+    // Pool depression
+    const poolGeometry = new THREE.CylinderGeometry(size, size * 0.8, 0.3, 16);
+    const poolMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8B6F47,
+        roughness: 0.9
+    });
+    const poolDepression = new THREE.Mesh(poolGeometry, poolMaterial);
+    poolDepression.position.y = -0.15;
+    poolGroup.add(poolDepression);
+    
+    // Pool water
+    const waterGeometry = new THREE.CylinderGeometry(size * 0.9, size * 0.7, 0.1, 16);
+    const waterMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x006994,
+        transparent: true,
+        opacity: 0.8,
+        roughness: 0.0,
+        metalness: 0.1,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.0,
+        reflectivity: 1.0
+    });
+    const poolWater = new THREE.Mesh(waterGeometry, waterMaterial);
+    poolWater.position.y = -0.05;
+    poolGroup.add(poolWater);
+    
+    // Add small rocks around pool
+    for (let i = 0; i < 8; i++) {
+        const rockGeometry = new THREE.DodecahedronGeometry(0.1 + Math.random() * 0.1, 0);
+        const rockMaterial = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(0.3, 0.3, 0.3)
+        });
+        const rock = new THREE.Mesh(rockGeometry, rockMaterial);
+        const angle = (i / 8) * Math.PI * 2;
+        rock.position.set(
+            Math.cos(angle) * (size + 0.5),
+            Math.random() * 0.1,
+            Math.sin(angle) * (size + 0.5)
+        );
+        rock.castShadow = true;
+        poolGroup.add(rock);
+    }
+    
+    poolGroup.position.set(x, -1.3, z);
+    return poolGroup;
+}
+
+// Add tidal pools
+for (let i = 0; i < 5; i++) {
+    scene.add(createTidalPool(
+        (Math.random() - 0.5) * 60,
+        18 + Math.random() * 15,
+        2 + Math.random() * 2
+    ));
+}
+
+// Create beach umbrella
+function createBeachUmbrella(x, z) {
+    const umbrellaGroup = new THREE.Group();
+    
+    // Umbrella pole
+    const poleGeometry = new THREE.CylinderGeometry(0.05, 0.05, 4, 8);
+    const poleMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8B4513,
+        roughness: 0.8
+    });
+    const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+    pole.position.y = 2;
+    pole.castShadow = true;
+    umbrellaGroup.add(pole);
+    
+    // Umbrella canopy
+    const canopyGeometry = new THREE.ConeGeometry(3, 1.5, 12);
+    const canopyMaterial = new THREE.MeshStandardMaterial({
+        color: new THREE.Color().setHSL(Math.random(), 0.8, 0.6),
+        roughness: 0.4,
+        side: THREE.DoubleSide
+    });
+    const canopy = new THREE.Mesh(canopyGeometry, canopyMaterial);
+    canopy.position.y = 4.5;
+    canopy.castShadow = true;
+    umbrellaGroup.add(canopy);
+    
+    umbrellaGroup.position.set(x, -1.5, z);
+    return umbrellaGroup;
+}
+
+// Create beach towel
+function createBeachTowel(x, z) {
+    const towelGeometry = new THREE.PlaneGeometry(2, 3, 1, 1);
+    const towelMaterial = new THREE.MeshStandardMaterial({
+        color: new THREE.Color().setHSL(Math.random(), 0.7, 0.5),
+        roughness: 0.7,
+        side: THREE.DoubleSide
+    });
+    
+    const towel = new THREE.Mesh(towelGeometry, towelMaterial);
+    towel.rotation.x = -Math.PI / 2 + (Math.random() - 0.5) * 0.3;
+    towel.rotation.z = Math.random() * Math.PI * 2;
+    towel.position.set(x, -1.4, z);
+    towel.receiveShadow = true;
+    
+    return towel;
+}
+
+// Add beach amenities
+for (let i = 0; i < 3; i++) {
+    scene.add(createBeachUmbrella(
+        (Math.random() - 0.5) * 40,
+        30 + Math.random() * 20
+    ));
+    
+    scene.add(createBeachTowel(
+        (Math.random() - 0.5) * 50,
+        25 + Math.random() * 25
+    ));
+}
 
 // Enhanced shoreline with breaking waves
 const shorelineGroup = new THREE.Group();
@@ -1007,6 +1230,20 @@ function animate() {
     scene.traverse((child) => {
         if (child.material && child.material.color && child.material.color.r === 0.486) { // grass color check
             child.rotation.z = child.userData.originalRotation + Math.sin(Date.now() * 0.001) * 0.1;
+        }
+    });
+    
+    // Animate seaweed
+    scene.traverse((child) => {
+        if (child.geometry && child.geometry.type === 'TubeGeometry' && child.userData.originalRotation !== undefined) {
+            child.rotation.z = child.userData.originalRotation + Math.sin(Date.now() * 0.0008 + child.position.x) * 0.15;
+        }
+    });
+    
+    // Animate wet sand reflection
+    scene.traverse((child) => {
+        if (child.material && child.material.clearcoat === 1.0 && child.position.y === -1.35) {
+            child.material.opacity = 0.8 + Math.sin(Date.now() * 0.001) * 0.2;
         }
     });
     
