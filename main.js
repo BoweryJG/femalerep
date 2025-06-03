@@ -210,31 +210,91 @@ scene.add(carGroup);
 function createPalmTree(x, z) {
     const treeGroup = new THREE.Group();
     
-    // Trunk
-    const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.7, 8, 8);
+    // Trunk with curved segments
+    const trunkCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0.2, 2, 0.1),
+        new THREE.Vector3(0.3, 4, 0.2),
+        new THREE.Vector3(0.2, 6, 0.1),
+        new THREE.Vector3(0, 8, 0)
+    ]);
+    
+    const trunkGeometry = new THREE.TubeGeometry(trunkCurve, 20, 0.4, 8, false);
     const trunkMaterial = new THREE.MeshStandardMaterial({
-        color: 0x8b4513,
-        roughness: 0.8
+        color: 0x8B6F47,
+        roughness: 0.9,
+        metalness: 0.1
     });
     const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-    trunk.position.y = 4;
     trunk.castShadow = true;
     treeGroup.add(trunk);
     
-    // Leaves
-    const leafGeometry = new THREE.ConeGeometry(3, 3, 6);
-    const leafMaterial = new THREE.MeshStandardMaterial({
-        color: 0x228b22,
-        roughness: 0.7
+    // Create realistic palm fronds
+    const frondCount = 12;
+    for (let i = 0; i < frondCount; i++) {
+        const frondGroup = new THREE.Group();
+        
+        // Main frond stem
+        const stemCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 0, 0),
+            new THREE.Vector3(1, -0.5, 0),
+            new THREE.Vector3(2.5, -1.5, 0),
+            new THREE.Vector3(4, -2.5, 0)
+        ]);
+        
+        const stemGeometry = new THREE.TubeGeometry(stemCurve, 10, 0.05, 4, false);
+        const stemMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4F7942,
+            roughness: 0.8
+        });
+        const stem = new THREE.Mesh(stemGeometry, stemMaterial);
+        frondGroup.add(stem);
+        
+        // Leaflets
+        const leafletCount = 30;
+        for (let j = 0; j < leafletCount; j++) {
+            const t = j / leafletCount;
+            const pos = stemCurve.getPointAt(t);
+            
+            const leafletGeometry = new THREE.PlaneGeometry(0.3, 0.8 * (1 - t * 0.5));
+            const leafletMaterial = new THREE.MeshStandardMaterial({
+                color: 0x3CB371,
+                side: THREE.DoubleSide,
+                roughness: 0.7
+            });
+            
+            const leaflet = new THREE.Mesh(leafletGeometry, leafletMaterial);
+            leaflet.position.copy(pos);
+            leaflet.rotation.x = -Math.PI / 4 + Math.random() * 0.2;
+            leaflet.rotation.z = (j % 2 === 0 ? 1 : -1) * (Math.PI / 4 + Math.random() * 0.2);
+            frondGroup.add(leaflet);
+        }
+        
+        // Position and rotate frond
+        const angle = (i / frondCount) * Math.PI * 2;
+        frondGroup.position.set(0, 8, 0);
+        frondGroup.rotation.y = angle;
+        frondGroup.rotation.z = Math.PI / 6 + Math.random() * 0.2;
+        
+        treeGroup.add(frondGroup);
+    }
+    
+    // Add coconuts
+    const coconutGeometry = new THREE.SphereGeometry(0.15, 8, 6);
+    const coconutMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8B4513,
+        roughness: 0.8
     });
     
-    for (let i = 0; i < 6; i++) {
-        const leaf = new THREE.Mesh(leafGeometry, leafMaterial);
-        const angle = (i / 6) * Math.PI * 2;
-        leaf.position.set(Math.cos(angle) * 2, 8, Math.sin(angle) * 2);
-        leaf.rotation.z = angle;
-        leaf.castShadow = true;
-        treeGroup.add(leaf);
+    for (let i = 0; i < 4; i++) {
+        const coconut = new THREE.Mesh(coconutGeometry, coconutMaterial);
+        coconut.position.set(
+            (Math.random() - 0.5) * 0.5,
+            7.5 + Math.random() * 0.5,
+            (Math.random() - 0.5) * 0.5
+        );
+        coconut.castShadow = true;
+        treeGroup.add(coconut);
     }
     
     treeGroup.position.set(x, 0, z);
@@ -357,30 +417,88 @@ for (let i = 0; i < 5; i++) {
     ));
 }
 
-// Foam where waves meet sand
-const foamGeometry = new THREE.PlaneGeometry(150, 20, 64, 16);
+// Enhanced shoreline with breaking waves
+const shorelineGroup = new THREE.Group();
+
+// Main foam line where waves meet sand
+const foamGeometry = new THREE.PlaneGeometry(180, 30, 128, 32);
 const foamMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     transparent: true,
-    opacity: 0.7,
+    opacity: 0.8,
     roughness: 0.1,
     metalness: 0,
     emissive: 0xffffff,
-    emissiveIntensity: 0.1
+    emissiveIntensity: 0.15
 });
 
-// Create foam wave pattern
+// Create foam wave pattern with more detail
 const foamVertices = foamGeometry.attributes.position.array;
 for (let i = 0; i < foamVertices.length; i += 3) {
     const x = foamVertices[i];
-    foamVertices[i + 2] = Math.sin(x * 0.1) * 0.3 + Math.random() * 0.1;
+    const y = foamVertices[i + 1];
+    // Multiple wave frequencies for realistic foam
+    foamVertices[i + 2] = 
+        Math.sin(x * 0.1) * 0.5 + 
+        Math.sin(x * 0.3 + 1) * 0.2 + 
+        Math.sin(y * 0.2) * 0.15 +
+        Math.random() * 0.1;
 }
 foamGeometry.computeVertexNormals();
 
 const foam = new THREE.Mesh(foamGeometry, foamMaterial);
 foam.rotation.x = -Math.PI / 2;
-foam.position.set(0, -1.4, 10);
-scene.add(foam);
+foam.position.set(0, -1.3, 10);
+shorelineGroup.add(foam);
+
+// Secondary foam line (receding wave)
+const foamLine2 = foam.clone();
+foamLine2.material = foamMaterial.clone();
+foamLine2.material.opacity = 0.4;
+foamLine2.position.z = 15;
+foamLine2.scale.x = 0.8;
+shorelineGroup.add(foamLine2);
+
+// Wet sand effect
+const wetSandGeometry = new THREE.PlaneGeometry(200, 40, 64, 16);
+const wetSandMaterial = new THREE.MeshStandardMaterial({
+    color: 0xd4a574,
+    roughness: 0.3,
+    metalness: 0.1,
+    transparent: true,
+    opacity: 0.6
+});
+
+const wetSand = new THREE.Mesh(wetSandGeometry, wetSandMaterial);
+wetSand.rotation.x = -Math.PI / 2;
+wetSand.position.set(0, -1.45, 20);
+shorelineGroup.add(wetSand);
+
+// Wave crests (breaking waves)
+for (let i = 0; i < 3; i++) {
+    const crestGeometry = new THREE.PlaneGeometry(60 - i * 10, 5, 32, 8);
+    const crestMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.9 - i * 0.2,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.1
+    });
+    
+    const crestVertices = crestGeometry.attributes.position.array;
+    for (let j = 0; j < crestVertices.length; j += 3) {
+        const x = crestVertices[j];
+        crestVertices[j + 2] = Math.sin(x * 0.2) * 0.3 + Math.random() * 0.05;
+    }
+    crestGeometry.computeVertexNormals();
+    
+    const crest = new THREE.Mesh(crestGeometry, crestMaterial);
+    crest.rotation.x = -Math.PI / 2.5;
+    crest.position.set(0, -0.5 + i * 0.2, 5 - i * 3);
+    shorelineGroup.add(crest);
+}
+
+scene.add(shorelineGroup);
 
 // Create crabs
 function createCrab() {
@@ -475,12 +593,12 @@ for (let i = 0; i < 8; i++) {
 function createFish() {
     const fishGroup = new THREE.Group();
     
-    // Fish body
+    // Fish body - silver instead of blue
     const bodyGeometry = new THREE.SphereGeometry(0.4, 8, 6);
     bodyGeometry.scale(1.5, 0.7, 0.5);
     const bodyMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0x4169e1,
-        metalness: 0.6,
+        color: 0xC0C0C0,
+        metalness: 0.8,
         roughness: 0.2,
         clearcoat: 0.5,
         clearcoatRoughness: 0.1
@@ -764,9 +882,22 @@ function animate() {
     }
     sandParticles.geometry.attributes.position.needsUpdate = true;
     
-    // Animate foam
-    foam.material.opacity = 0.6 + Math.sin(Date.now() * 0.002) * 0.2;
-    foam.position.z = 10 + Math.sin(Date.now() * 0.001) * 2;
+    // Animate shoreline
+    shorelineGroup.children.forEach((child, index) => {
+        if (child.material && child.material.opacity !== undefined) {
+            // Foam lines move in and out
+            if (index < 2) {
+                child.position.z = child.userData.originalZ || (index === 0 ? 10 : 15);
+                child.position.z += Math.sin(Date.now() * 0.001 + index) * 3;
+                child.material.opacity = child.userData.originalOpacity || (index === 0 ? 0.8 : 0.4);
+                child.material.opacity += Math.sin(Date.now() * 0.002) * 0.2;
+            }
+            // Wave crests
+            if (index > 3) {
+                child.position.y = -0.5 + (index - 4) * 0.2 + Math.sin(Date.now() * 0.003 + index) * 0.1;
+            }
+        }
+    });
     
     // Subtle car animation
     carGroup.position.y = Math.sin(Date.now() * 0.001) * 0.1;
